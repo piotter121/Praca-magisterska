@@ -1,0 +1,38 @@
+\chapter{Wprowadzenie}
+
+Prowadzenie projektów wymaga równoległego prowadzenia ich dokumentacji. 
+Wraz ze wzrostem jej obszerności okazuje się jak ważną rolę pełni dobry system do prowadzenia takiej dokumentacji.
+Dzięki niemu można zaoszczędzić wiele czasu i zwiększyć efektywność pracy zespołu.
+Nie tylko pełni on role głównego magazynu do przechowywania i organizacji cyfrowego archiwum, ale również daje możliwość podglądu zmian dokonywanych przez członków grupy.
+
+Efektem mojej pracy inżynierskiej był projekt i implementacja prototypu prostego systemu do obiegu dokumentów w projektach. 
+Aplikacja ta została wykonana jako trójwarstwowa aplikacja internetowa.
+System ten rozwiązywał następujące problemy:
+\begin{itemize}
+    \item zarządzenie strukturą projektu: podział na podzadania i przydzielanie do nich odpowiednich uczestników,
+    \item śledzenie, kto dokonał, jakich zmian,
+    \item śledzenie, która wersja dokumentu jest najnowsza.
+\end{itemize}
+
+System ten, z powodu ograniczeń czasowych, nie posiadał rozbudowanej funkcjonalności, stanowił punkt startowy dla narzędzia wspomagającego obieg dokumentów w projektach.
+Warstwa przechowywania danych została zaprojektowana i zaimplementowana z wykorzystaniem relacyjnej bazy danych, o czym zdecydowała dostępność i popularność obecnych na rynku rozwiązań. 
+
+Bazy danych z tej rodziny dominują na rynku od dziesiątek lat, co stanowi fenomen w świecie ciągle zmieniającej się branży informatycznej. 
+Mimo wielu zalet posiadają one swoje ograniczenia m. in. w postaci sztywnego schematu danych.
+Wraz ze wzrostem złożoności modelu relacyjnej bazy danych rośnie również czas operacji i zapytań do takiej bazy.
+Rosnące wymagania związane z~rozwojem aplikacji internetowych spowodowały powstanie wielu nowych typów baz danych.
+Nowe rozwiązania w różny sposób i w różnym kierunku odchodzą od klasycznego modelu relacyjnego.
+Dynamiczny rozwój nierelacyjnych baz danych pokazuje, że wymagania stawiane przed nowymi projektami są na tyle duże, że nie można dłużej mówić o uniwersalnym rozwiązaniu każdego problemu, jakim do niedawna mogły wydawać się bazy relacyjne.
+
+\section*{Cel i zakres pracy}
+
+Głównym celem niniejszej pracy dyplomowej jest analiza porównawcza wybranych baz nierelacyjnych w kontekście aplikacji do prowadzenia projektów i dokumentacji z nimi związanych. 
+Analiza posłużyła do wyboru optymalnego rozwiązania, które pozwoliłoby na wydajną pracę omawianej aplikacji i nie hamowało by rozszerzania jej funkcjonalności.
+
+Do celów porównawczych powstał system obiegu dokumentów w projektach w trzech wersjach (w~zależności od wykorzystanej bazy danych):
+\begin{itemize}
+    \item korzystający z bazy MongoDB,
+    \item korzystający z bazy Apache Cassandra,
+    \item korzystający z baz Apache Cassandra i PostgreSQL
+\end{itemize}
+Funkcjonalność systemu została dodatkowo rozszerzona o wyszukiwanie pełnotekstowe w przechowywanych w systemie plikach.

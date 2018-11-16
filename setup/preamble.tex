@@ -1,0 +1,61 @@
+\documentclass[a4paper, 11pt, twoside, openany, polish]{report}
+% \usepackage{tocloft}
+% \renewcommand{\cftfigfont}{Rysunek }
+% \renewcommand{\cfttabfont}{Tabela }
+\usepackage{polski}
+\usepackage{helvet}
+\usepackage[T1]{fontenc}
+\usepackage{anyfontsize}
+\usepackage[utf8]{inputenc}
+\usepackage[pdftex]{graphicx}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage[polish]{babel}
+\usepackage{subfigure}
+\usepackage{listings} % listingi
+\usepackage{color}
+\usepackage{courier}
+\usepackage{amsfonts}
+\usepackage{verbatim}
+\usepackage{indentfirst}
+\usepackage[shortcuts]{extdash}
+\usepackage[pdftex, hidelinks]{hyperref}
+\usepackage{datatool}
+\usepackage{fancyhdr}
+\usepackage{seqsplit}
+\usepackage[autostyle]{csquotes}
+\DeclareQuoteAlias{dutch}{polish}
+\usepackage{opensans} %do strony tytułowej
+\usepackage[top=25mm,bottom=25mm,inner=3cm,outer=2cm]{geometry}
+
+% Caption setup
+% \usepackage{caption}
+% \captionsetup{justification=raggedright,singlelinecheck=off}
+% \captionsetup[table]{name=Tabela}
+
+% dla listingów
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\lstset{
+	frame=bottomline,
+    basicstyle=\footnotesize\ttfamily,
+    keywordstyle=\color{blue},
+    commentstyle=\itshape\color{mygray},
+    captionpos=b,
+    stringstyle=\color{red},
+    showstringspaces=false,
+    numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+    numbersep=5pt,                   % how far the line-numbers are from the code
+    numberstyle=\tiny\color{mygray}\ttfamily
+}
+
+\linespread{1.15}
+%\renewcommand{\thechapter}{\arabic{chapter}.}
+%\renewcommand{\thesection}{\arabic{chapter}.\arabic{section}.}
+%\renewcommand{\thesubsection}{\thesection\arabic{subsection}.}
+
+\newcommand{\code}[1]{\ttfamily#1\normalfont}
+\hyphenation{File-Meta-data}
+
+\newenvironment{phv}{\fontfamily{phv}\selectfont}
+
+% \usepackage[nottoc]{tocbibind}
