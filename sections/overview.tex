@@ -300,7 +300,37 @@ Każdy z nich jest przechowywany w jakiejś kolekcji.
 Kolekcje są to zbiory dokumentów, które do pewnego stopnia powinny być ze sobą spójne pod względem zawartości, lecz nie ma odgórnego mechanizmu sprawdzającego spójność dokumentów w kolekcji.
 Są one odpowiednikami tabel w relacyjnych bazach danych.
 
+W systemie MongoDB dokumenty w obrębie jednej kolekcji są fizycznie przechowywane w innych plikach na dysku.
+Z tego względu jest odradzane podejście polegające na tworzeniu jednej kolekcji dla wszystkich dokumentów z powodów architektonicznych, jak i wydajnościowych.
 
+Wielkość każdego dokumentu jest ograniczona do 16 MB \cite{DocumentsManual}.
+Nie jest to ograniczenie związane z implementacją tej bazy danych.
+Ma ono na celu uświadomienie architektowi bazy danych, że jeśli jego projekt zakłada przechowywanie dokumentów, które są tak duże to najprawdopodobniej można go uprościć i znacznie przyspieszyć działanie całego systemu.
+
+\subsubsection{Modelowanie relacji}
+
+Jednym z najważniejszych elementów podczas projektowania dokumentowej bazy danych, są relacje pomiędzy obiektami.
+Istnieją dwa sposoby rozwiązania tego problemu w MongoDB \cite{MongoDBRefs}:
+\begin{enumerate}
+    \item \textbf{Osadzenie jednego dokumentu w drugim} -- podejście to ma niewątpliwą zaletę, jest bardzo szybkie oraz proste do zaimplementowania.
+    W przypadku modelowania relacji jeden do wielu zamiast pojedynczego obiektu należy zapisać ich listę.
+    Problem powstaje, gdy zagnieżdżone dokumenty są w relacji z innymi encjami.
+    \item \textbf{Zapisywanie referencji do innego dokumentu} -- podejście znane z baz relacyjnych.
+    Aplikacje korzystające z MongoDB używają jednej z dwóch metod do odwoływania się do innych dokumentów:
+    \begin{itemize}
+        \item \textbf{Ręczne odwołania}, gdzie zapisywane jest tylko pole \textit{\_id} innego dokumentu jako referencja.
+        Aplikacja kliencka może wtedy wykonać kolejne zapytanie, aby pobrać powiązany dokument.
+        Tego rodzaju referencje są proste i wystarczające w większości przypadków użycia.
+        \item \textbf{Odwołanie typu \textit{DBRef}} to odwołanie przechowujące, oprócz pola \textit{\_id} powiązanego dokumentu, nazwę kolekcji gdzie jest zapisany dokument, oraz opcjonalnie nazwę bazy danych gdzie się znajduje dana kolekcja.
+        Korzystając z tych wartości możliwe jest łatwiejsze powiązanie dokumentów z różnych kolekcji, a nawet baz danych.
+        Analogicznie jak w przypadku pierwszego rodzaju odwołania aplikacja kliencka musi wykonać dodatkowe zapytania w celu pobrania dodatkowych informacji.
+        Wiele bibliotek klienckich posiada metody pomocnicze tworzące zapytania po dokumenty, do których odwołują się referencje DBRef.
+        Warto zaznaczyć, że nie robią tego automatycznie lecz tylko na żądanie.
+        
+        Odwołania DBRef zapewniają wspólny format i typ przedstawiania relacji między dokumentów.
+        Format DBRef zapewnia również wspólną semantykę reprezentowania powiązań między dokumentami jeżeli baza danych musi współpracować z wieloma frameworkami i narzędziami.
+    \end{itemize}
+\end{enumerate}
 
 \subsection{Architektura systemu}
 
