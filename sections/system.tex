@@ -67,8 +67,14 @@ Zbiór przypadków użycia związany z zarządzaniem projektami i zadaniami w sy
 
 \subsubsection{Funkcjonalność związana z plikami i ich wersjami}
 
-Przypadki użycia związane z wszystkimi czynnościami, które można wykonać na plikach w~obrębie systemu:
+Przypadki użycia związane z wszystkimi czynnościami, które można wykonać w związku z plikami w~obrębie systemu:
 \begin{enumerate}
+    \item \textbf{Wyszukiwanie pełnotekstowe wśród plików zadania/projektu} jest rozszerzeniem funkcjonalności systemu w porównaniu do systemu powstałego w pracy inżynierskiej.
+    Ten przypadek użycia ma na celu zbadanie możliwości i wsparcia wyszukiwania pełnotekstowego przez bazy danych.
+    Wyszukiwanie to jest dostępne dla uczestników projektów i zadań.
+    Można je uruchomić z poziomu widoku listy zadań -- wtedy zostaną przeszukane wszystkie pliki zadań, do których użytkownik ma dostęp.
+    Wyszukiwanie z widoku listy plików w zadaniu ogranicza przeszukiwane pliki do tych, które znajdują się w zadaniu.
+    Po wyświetleniu listy plików dopasowanych do wyszukiwanej frazy można wybrać jeden z nich i przejść do szegółowych informacji o nim.
     \item \textbf{Zatwierdzenie pliku} -- przypadek użycia przeznaczony dla administratora zadania. 
     Może być zrealizowany gdy system wyświetla listę plików przypisanych do zadania. 
     Po wybraniu pozycji z tej listy administrator wybiera opcję zatwierdzenia. 
@@ -88,6 +94,20 @@ Przypadki użycia związane z wszystkimi czynnościami, które można wykonać n
 \end{enumerate}
 
 \section{Architektura systemu}
+
+System został zaprojektowany i zaimplementowany zgodnie z architekturą wielowarstwową jako aplikacja internetowa.
+Składa się z dwóch aplikacji: klienta przeglądarkowego i serwera aplikacyjnego.
+Można wyróżnić w nim następujące warstwy:
+\begin{itemize}
+    \item \textbf{warstwa dostępu do danych} -- nadaje poziom abstrakcji ukrywając technologię stojącą za przechowywaniem danych systemu.
+    Na jej poziomie następują bezpośrednie połączenia z konkretną bazą danych i komunikacją z nią.
+    Dzięki niej wymiana bazy danych sprowadza się do zmian we właśnie tej warstwie.
+    \item \textbf{warstwa logiki biznesowej} -- odpowiedzialna za główną logikę aplikacji, koordynuje jej pracę. 
+    Ponadto jest odpowiedzialna za przetwarzanie i przekazywanie danych między warstwą dostępu do danych, a warstwą kontrolerów.
+    \item \textbf{warstwa kontrolerów} -- najbardziej zewnętrzna warstwa w serwerze aplikacyjnym, wystawia sieciowy interfejs programowania aplikacji (ang.~\textit{WebAPI}) dla klienta przeglądarkowego.
+    Jest odpowiedzialna za przyjmowanie i odpowiadanie żądania od niego poprzez wywoływanie odpowiednich procedur warstwy logiki biznesowej.
+    \item \textbf{warstwa prezentacji} -- klient przeglądarkowy, stanowi główny interfejs dla użytkownika systemu.
+\end{itemize}
 
 \section{Model danych}
 
