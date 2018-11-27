@@ -332,8 +332,121 @@ Istnieją dwa sposoby rozwiązania tego problemu w MongoDB \cite{MongoDBRefs}:
     \end{itemize}
 \end{enumerate}
 
-\subsection{Architektura systemu}
+Warto odnotować, że w MongoDB w wersji 3.2 wprowadzono nową fazę agregacji o nazwie \textit{\$lookup}.
+Działa podobnie do operacji lewego złączenia zewnętrznego (LEFT OUTER JOIN) znanej z relacyjnych baz danych.
+Do każdego dokumentu wyjściowego zostaje dodane pole z listą dokumentów, które zostały dopasowane ze \enquote{złączonej} kolekcji.
+Zmodyfikowane tak dokumenty zostają przekazane do kolejnych etapów agregacji.
+Ograniczenie tej operacji polega na tym, że przeszukiwana kolekcja musi znajdować się w tej samej bazie danych co kolekcja na której wykonujemy operację agregacji.
+Dodatkowo użytkownik korzystający z tej fazy agregacji musi mieć na uwadze topologię siecią bazy danych, ponieważ przeszukiwanie kolekcji znajdującej się na innej maszynie może doprowadzić do nieakceptowalnych opóźnień w działaniu aplikacji.
 
-\subsection{Biblioteki klienckie}
+\subsubsection{Indeksy}
+
+W celu przyspieszenia wyszukiwania w bazie danych MongoDB należy wykorzystać mechanizm indeksowania pól.
+Jest on analogiczny do podejścia znanego z relacyjnych baz danych.
+Indeks można założyć w ramach pojedynczej kolekcji, analogicznie jak to ma miejsce w relacyjnych systemach baz danych, gdzie indeks jest zakładanych na pojedynczej tabeli.
+
+MongoDB udostępnia wiele różnych typów indeksów do obsługi określonych typów danych i zapytań \cite{MongoDBIndexes}:
+\begin{itemize}
+    \item \textbf{Indeks na pojedynczym polu}: oprócz domyślnie zdefiniowanego indeksy na polu \textit{\_id}, system ten wspiera tworzenie posortowanych indeksów na pojedynczym polu dokumentu.
+    \item \textbf{Indeks złożony}: istnieje możliwość utworzenia indeksów na zestawie pól dokumentu.
+    \item \textbf{Indeks typu \textit{multikey}}: używany do indeksowania zawartości przechowywanej w tablicach.
+    Jeżeli użytkownik utworzy indeks indeks na polu przechowującym tablicę, MongoDB wprowadza osobne wpisy w indeksie dla każdego elementu tablicy.
+    System ten automatycznie określa, czy ma utworzyć indeks typu \textit{multikey}, sprawdzając czy indeksowane pole zawiera tablicę.
+    \item \textbf{Indeks geoprzestrzenny}: specjalny tym indeksu dla danych geoprzestrzennych.
+    \item \textbf{Indeks tekstowy}: wspomaga przeszukiwanie pełnotekstowe dokumentów.
+    Indeks tego typu analizuje wybrane pola pod względem leksykalnym w danym języku i indeksuje z nich słowa kluczowe w podstawowej formie.
+    \item \textbf{Indeks bazujący na wartości funkcji haszującej}: struktura indeksu jest tworzona z wartości funkcji haszującej wybrane pole dokumentu.
+    Te indeksy mają bardziej losowy rozkład wartości wzdłuż ich zasięgu. 
+    Są wykorzystywane tylko do wyszukiwań bazujących na równości i nie wspierają kwerend opartych na zakresie.
+    Pomimo to ich głównym zastosowaniem jest wspomaganie partycjonowania danych w klastrze bazując na wartości funkcji skrótu.
+\end{itemize}
+
+\subsection{Transakcyjność operacji}
+
+W MongoDB operacje na pojedynczych dokumentach są atomowe.
+Dzięki możliwości przechowywania zagnieżdżonych dokumentów i tablic do przechowywania relacji między danymi w pojedynczym dokumencie, zamiast normalizować je w wiele dokumentów i kolekcji, atomowość operacji na pojedynczym dokumencie eliminuje potrzebę transakcji na wielu dokumentach w wielu przypadkach użycia.
+
+W sytuacji, gdy wymagana jest atomowość modyfikacji wielu dokumentów lub spójność między odczytami do wielu z nich, MongoDB umożliwia wykonywanie transakcji z wieloma dokumentami w zbiorze replik.
+Takie transakcje można używać w celu wykonywania wielu operacji na kolekcjach, bazach danych i dokumentach.
+Działają zgodnie z zasadą "wszystko albo nic".
+Kiedy transakcja zostanie zatwierdzona, wszystkie zmiany danych dokonane w transakcji zostaną zapisane.
+Jeśli jakakolwiek operacja w transakcji zakończy się niepowodzeniem, zostanie ona przerwana, a wszystkie zmiany danych dokonane w transakcji zostaną odrzucone.
+Do momentu zatwierdzenia żadne operacje zapisu w transakcji nie są widoczne poza nią \cite{MongoDBTransactions}.
+
+\subsection{Podstawowe komponenty systemu}
+
+MongoDB składa się z kilku komponentów:
+\begin{itemize}
+    \item \textbf{mongod} -- usługa, która odpowiada za działanie bazy danych.
+    Jest uruchamiana w trybie \textit{daemon} w systemach z rodziny Unix oraz jako \textit{Windows service} w  systemie Windows.
+    Jest niezbędna do działania całego systemu i zdolna do samodzielnego wykonania replikacji danych pomiędzy różne węzły sieci.
+    \item \textbf{mongos} -- proces uczestniczący określaniu lokalizacji wyszukiwanych danych w rozproszonym środowisku MongoDB.
+    Dzięki temu baza danych wydaje się tworem spójnym i jednorodnym dla zewnętrznych klientów.
+    \item \textbf{mongo} -- interaktywna konsola JavaScript.
+    Dostarcza wszechstronny interfejs dla administratorów systemu, a także sposób dla programistów do testowania zapytań i operacji bezpośrednio na bazie danych.
+\end{itemize}
+
+\subsection{Działanie w środowisku rozproszonym}
+
+Podobnie jak Apache Cassandra, MongoDB bardzo dobrze działa w środowisku rozproszonym.
+Posiada wbudowane wsparcie dla mechanizmów partycjonowania, replikacji danych i operacji MapReduce.
+
+Zbiór replik (ang.~\textit{replica set}) jest grupą instancji \textit{mongod}, które utrzymują ten sam zestaw danych.
+Zawiera on kilka węzłów zawierających dane i opcjonalnie jeden węzeł arbitrażowy.
+Z węzłów zawierających dane jeden i tylko jeden jest uważany za węzeł główny, podczas gdy pozostałe są węzłami drugorzędnymi.
+Replikacja danych jest w pełni asynchroniczna.
+Wybór jednostki głównej spośród węzłów klastra dokonuje się w sposób automatyczny.
+W momencie, gdy węzeł główny nie komunikuje się z pozostałymi członkami zbioru przez więcej niż skonfigurowany \textit{electionTimeoutMillis} okres (domyślnie 10 sekund), jeden z drugorzędnych węzłów ogłasza \enquote{wybory} nowego głównego węzła.
+W odpowiedzi klaster dokonuje wyboru nowego podstawowego węzła i wznawia normalna pracę. Rysunek \ref{fig:mongoAutoFailover} przedstawia wyżej opisanych schemat działania automatycznego przełączenia awaryjnego.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.6\textwidth]{figures/replica-set-trigger-election.png}
+\caption{Automatyczne przełączenie głównego węzła w sytuacji awaryjnej \cite{MongoDBReplication}}
+\label{fig:mongoAutoFailover}
+\end{figure}
+
+\subsection{Biblioteki klienckie i narzędzia dostępowe}
+
+MongoDB posiada bogatą bazę oficjalnie wspieranych bibliotek klienckich.
+Znajdziemy rozwiązania dostępne w praktycznie wszystkich najpopularniejszych językach programowania, począwszy od C/C++, które można osadzić w aplikacjach popularnej w dzisiejszych czas platformy \textit{Internet of Things}, po Javę i popularne języki skryptowe: Python, PHP, Ruby i JavaScript, popularyzując użycie MongoDB w aplikacjach internetowych.
+
+Istnieją też otwarte rozbudowane środowiska administracyjne dla MongoDB automatyzujące i ułatwiające pracę administratorów.
+Są to m. in. Mongo-Express, Robo 3T (wcześniej znane jako Robomongo) oraz MongoDB Compass (darmowa wersja Community Edition i bardziej rozbudowana jako część płatnego wsparcia dostępnego u twórców bazy danych).
 
 \subsection{Wyszukiwanie pełnotekstowe}
+
+MongoDB wspiera wyszukiwanie pełnotekstowe.
+Aby móc wykonywać tego typu zapytania należy utworzyć indeks tekstowy na wybranych polach dokumentów, które chcemy przeszukiwać, a w zapytaniu należy użyć operatora \textit{\$text}.
+Na jedną kolekcję może przypadać maksymalnie jeden indeks tekstowy, ale taki indeks może obejmować wiele pól.
+
+Operator \textit{\$text} dzieli zadany ciąg znaków do wyszukania używając białych znaków i większości znaków interpunkcyjnych jako separatorów.
+Zwracane są dokumenty, które zostały dopasowane do któregokolwiek z zadanych tokenów.
+Przykładowo, można użyć zapytania przedstawionego na listingu \ref{lst:mongoExampleTxtSearch}, aby znaleźć wszystkie sklepy zwierające dowolne wyrazy z listy: \enquote{best}, \enquote{tea}, \enquote{shop}.
+
+\begin{lstlisting}[language=JavaScript,caption={Zapytanie wykonujące wyszukiwanie pełnotekstowe},label={lst:mongoExampleTxtSearch}]
+db.stores.find({$text: {$search: "best tea shop"}})
+\end{lstlisting}
+
+Istnieje też możliwość wyszukiwania dokładnych fraz poprzez opakowywanie ich w cudzysłów. 
+Dla przykładu, zapytanie przedstawione na listingu \ref{lst:mongoExamplePhraseSearch}
+odnajdzie dokumenty zawierające wyraz \enquote{best} lub frazę \enquote{tea shop}.
+
+\begin{lstlisting}[language=JavaScript,
+caption={Zapytanie dopasowujące dokładną frazę},
+label={lst:mongoExamplePhraseSearch}]
+db.stores.find({$text: {$search: "best \"tea shop\""}})
+\end{lstlisting}
+
+W celu wykluczenia z wyszukiwania konkretnego słowa należy poprzedzić wybrane słowo znakiem \enquote{-}.
+Przykładowo, zapytanie z listingu \ref{lst:mongoExampleExcludeSearch} zwróci wszystkie sklepy zawierające wyrazy \enquote{best} lub \enquote{shop} i nie zawierające wyrazu \enquote{tea}.
+
+\begin{lstlisting}[language=JavaScript,
+caption={Zapytanie wykluczające wyraz \enquote{tea}},
+label={lst:mongoExampleExcludeSearch}]
+db.stores.find({$text: {$search: "best -tea shop"}})
+\end{lstlisting}
+
+Wyniki wyszukiwanie tekstowego są domyślnie zwracane nieposortowane. 
+Jednakże kwerendy wyszukiwania tekstowego obliczają wynik trafności dla każdego dokumentu, który określa, jak dobrze dokument pasuje do zapytania.
+Taki wynik trafności dopasowania może posłużyć jako kryterium sortowania wyników.

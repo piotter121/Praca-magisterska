@@ -1,1 +1,98 @@
-\chapter{Budowa systemu do prowadzenia projektów}
+\chapter{Projekt systemu do prowadzenia projektów}
+
+Rozdział ten opisuje autorski system do prowadzenia projektów w trzech wersjach, każda z nich różni się zastosowanym modelem i bazą danych.
+Powstały dwie wersje odpowiednio dla baz Apache Cassandra i MongoDB, oraz trzeci wariant z modelem hybrydowym, gdzie część danych jest przechowywana w bazie relacyjnej, a część w bazie nierelacyjnej.
+Główna część systemu powstała jako rezultat pracy inżynierskiej.
+Niniejsza praca bazuje na nim rozszerzając nieznacznie jego funkcjonalność w celu dogłębniejszej analizy możliwości porównywanych baz.
+
+\section{Specyfikacja wymagań funkcjonalnych}
+
+Jedną z najważniejszych faz rozwoju oprogramowania jest wyspecyfikowanie wymagań.
+Jest to część inżynierii oprogramowania dostarczająca nam środków i metod umożliwiających zebranie na temat funkcjonalności tworzonej przez nas aplikacji lub systemu komputerowego.
+Popełnienie błędu w tej fazie projektu jest najbardziej kosztowne, ponieważ jest to początkowa faza i błędy w niej popełnione propagują się na kolejne fazy.
+
+\subsection{Role i uprawniania użytkowników w systemie}
+
+W opisywanym systemie do prowadzenie projektów można wyróżnić następujące role i powiązane z nimi uprawnienia:
+\begin{itemize}
+    \item \textbf{Użytkownikiem} jest każdy, kto posiada zarejestrowane konto w aplikacji.
+    \item \textbf{Administratorem projektu} staje się użytkownik aplikacji w momencie, gdy stworzy nowy projekt.
+    Daje mu to uprawnienia do:
+    \begin{itemize}
+        \item dodawania nowych zadań w projekcie,
+        \item usuwania istniejących zadań,
+        \item usunięcia administrowanego projektu.
+    \end{itemize}
+    \item \textbf{Uczestnikiem zadania} staje się użytkownik, który został przypisany do zadania przez administratora.
+    Dzięki temu zyskuje uprawnienia do:
+    \begin{itemize}
+        \item dodawania nowego pliku do zadania,
+        \item pobrania wybranej wersji pliku,
+        \item zaznaczenia pliku do zatwierdzenia przez administratora zadania,
+        \item zapisania nowej wersji pliku,
+        \item wyświetlenia szczegółowych informacji o wersji pliku.
+    \end{itemize}
+    \item \textbf{Administratorem zadania} zostaje użytkownik aplikacji, który został wybrany do tego przez administrator projektu podczas tworzenia zadania.
+    Otrzymuje on wtedy następujące przywileje:
+    \begin{itemize}
+        \item możliwość przypisania/usunięcia uczestnika do/z administrowanego zadania,
+        \item możliwość zatwierdzenia ostatecznej wersji pliku,
+        \item możliwość usunięcia pliku.
+    \end{itemize}
+    Oprócz tych uprawnień użytkownik pełniący tą rolę otrzymuje wszystkie uprawniania uczestnika projektu.
+\end{itemize}
+
+Jeden użytkownik może pełnić wiele z wyżej wymienionych ról.
+Pełniąc je dziedziczy wymienione uprawnienia. 
+
+\subsection{Przypadki użycia}
+
+Przypadki użycia opisywanego systemu zostały podzielone na dwie grupy funkcjonalne.
+Ma to na celu łatwiejsze zrozumienie oferowanej przez system funkcjonalności.
+
+\subsubsection{Funkcjonalność związana z projektami i zadaniami}
+
+Zbiór przypadków użycia związany z zarządzaniem projektami i zadaniami w systemie:
+\begin{enumerate}
+    \item \textbf{Utworzenie projektu} -- każdy użytkownik systemu może utworzyć i zarządzać swoimi projektami.
+    \item \textbf{Wyświetlenie listy projektów}, w których uczestniczy użytkownik jest wyświetlane tuż po zalogowaniu się do aplikacji.
+    \item \textbf{Wyświetlenie szczegółowych informacji o projekcie wraz z listą zadań} -- użytkownik może wyświetlić informacje o projekcie jeżeli jest uczestnikiem projektu tzn. jest administratorem projektu, lub administratorem lub uczestnikiem zadania.
+    \item \textbf{Wyświetlenie szczegółowych informacji o zadaniu wraz z listą plików} -- użytkownik może wyświetlić informacje o zadaniu jeżeli jest przypisany do niego, lub jest jego administratorem.
+    \item \textbf{Dodanie nowego zadania do projektu} -- uprawniony do tego jest administrator projektu.
+    \item \textbf{Usunięcie zadania} -- uprawniony do tego jest administrator projektu.
+    \item \textbf{Usunięcie projektu} -- uprawniony do tego jest administrator projektu.
+    \item \textbf{Przypisanie nowego uczestnika do zadania} -- ta funkcja jest dostępna dla administratora zadania.
+    \item \textbf{Usunięcie uczestnika z zadania} -- ta funkcja jest dostępna dla administratora zadania.
+\end{enumerate}
+
+\subsubsection{Funkcjonalność związana z plikami i ich wersjami}
+
+Przypadki użycia związane z wszystkimi czynnościami, które można wykonać na plikach w~obrębie systemu:
+\begin{enumerate}
+    \item \textbf{Zatwierdzenie pliku} -- przypadek użycia przeznaczony dla administratora zadania. 
+    Może być zrealizowany gdy system wyświetla listę plików przypisanych do zadania. 
+    Po wybraniu pozycji z tej listy administrator wybiera opcję zatwierdzenia. 
+    Po tej czynności plik posiada status zatwierdzony i nie może można go już edytować.
+    \item  \textbf{Usunąć plik} może tylko administrator zadania. 
+    Wraz z plikiem usuwane są wszystkie zapisane wersje. 
+    W celu usunięcia pliku administrator wybiera pozycję z listy plików i~wybiera opcję usunięcia.
+    \item \textbf{Wyświetlenie szczegółów pliku z listą wersji} -- uprawniony do tego jest uczestnik zadania.
+    Może tego dokonać w poziomu widoku listy plików.
+    \item \textbf{Dodanie nowego pliku} -- funkcjonalność dostępna dla każdego uczestnika zadania. 
+    \item \textbf{Pobranie wersji pliku} -- dostępne dla uczestnika zadania. 
+    Po przejściu do widoku listy wersji pliku może wybrać opcję pobrania konkretnej wersji.
+    \item \textbf{Zaznaczenie pliku do zatwierdzenia przez administratora zadania} -- prosty przypadek użycia dostępny dla uczestnika zadania.
+    Po wyświetleniu  szczegółowego widoku informacji o pliku może wybrać opcję oznaczenia pliku do zatwierdzania.
+    \item \textbf{Zapisanie nowej wersji pliku} jest dostępne dla uczestnika zadania z poziomu widoku szczegółowych informacji o pliku.
+    \item \textbf{Wyświetlenie szczegółowych informacji o wersji pliku} -- opcja dostępna dla uczestników zadania.
+\end{enumerate}
+
+\section{Architektura systemu}
+
+\section{Model danych}
+
+\subsection{Apache Cassandra + Elasticsearch}
+
+\subsection{MongoDB}
+
+\subsection{Model hybrydowy}
