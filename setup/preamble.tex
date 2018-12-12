@@ -10,6 +10,7 @@
 \usepackage[pdftex]{graphicx}
 \usepackage{tabularx}
 \usepackage{array}
+\usepackage{url}
 \usepackage[polish]{babel}
 \usepackage{subfigure}
 \usepackage{listings} % listingi
@@ -27,6 +28,7 @@
 \DeclareQuoteAlias{dutch}{polish}
 \usepackage{opensans} %do strony tytułowej
 \usepackage[top=25mm,bottom=25mm,inner=3cm,outer=2cm]{geometry}
+\usepackage{multirow}
 
 % Caption setup
 % \usepackage{caption}
@@ -41,6 +43,15 @@
   morestring=[b]",
   morestring=[b]'
 }
+
+% CQL
+\lstdefinelanguage{CQL}{
+    morekeywords={
+        create,type,table,text,bigint,frozen,timestamp,uuid,primary,key,clustering,order,by,set,with,asc,desc,list,boolean,blob
+    },
+    sensitive=false
+}
+
 
 % dla listingów
 \definecolor{mygray}{rgb}{0.5,0.5,0.5}

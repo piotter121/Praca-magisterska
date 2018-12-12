@@ -1,9 +1,30 @@
 \renewcommand{\abstractname}{STRESZCZENIE}
 \begin{abstract}
 
-Streszczenie \\[5mm]
+Celem niniejszej pracy dyplomowej jest analiza porównawcza i wybór optymalnej technologii przechowywania danych spośród rozwiązań nierelacyjnych w systemie do prowadzenia projektów.
+W takim systemie ważne jest zachowanie wysokiej dostępności przy spójności danych.
+Analiza została dokonana w kilku etapach.
 
-\textbf{Słowa kluczowe:} aplikacja, wersjonowanie, dokumenty, projekt, obieg 
+Pierwszym z nich była przedstawienie i analiza sposobu działania wybranych wydajnych baz nierelacyjnych.
+Porównane zostały sposoby przechowywania i organizacji danych, i kluczowe mechanizmy działania tych systemów.
+Opisany został również sposób ich działania w środowisku rozproszonym.
+Ważnym kryterium wyboru są biblioteki klienckie i narzędzia dostępowe, które również zostały opisane.
+Przydatną i niedostępną zbyt powszechnie w relacyjnych systemach jest możliwość indeksowania i wyszukiwania pełnotekstowego.
+
+Kolejnym etapem była implementacja i przedstawienie budowy systemu do prowadzenia projektów, który powstał w trzech wersjach różniących się zastosowanymi modelami danych.
+Opisana została specyfikacja wymagań funkcjonalnych z wydzielonymi rolami w systemie i odpowiednio pogrupowanymi przypadkami użycia.
+Zaprezentowano również architekturę systemu z uwzględnieniem poszczególnych jego warstw oraz wykorzystany stos technologiczny.
+
+Na koniec dokonano analizy wydajnościowej za pomocą syntetycznych testów z wykorzystaniem programu JMeter.
+Po wyznaczeniu porównywanych metryk i scenariuszów testowych przystąpiono do testów.
+Po testach wyniki zostały przeanalizowane pod względem czasu odpowiedzi aplikacji i szybkości przetwarzania żądań.
+
+Praca ta stanowi wstęp do dalszego rozwoju powstałego systemu.
+Po dokonaniu optymalnego wyboru bazy danych możliwy jest jego podział na mikroserwisy.
+Pozwoliłoby to na sprawdzenie zachowania aplikacji w środowisku rozproszonym.
+\\[5mm]
+
+\textbf{Słowa kluczowe:} aplikacja, analiza, NoSQL, projekt, testy 
 
 \end{abstract}
 \clearpage
@@ -11,12 +32,33 @@ Streszczenie \\[5mm]
 \renewcommand{\abstractname}{ABSTRACT}
 \begin{abstract}
 \begin{center}
-\textbf{Document management system for research projects}
+\textbf{Comparative analysis of efficient non-relational databases in a project management system}
 \end{center} 
 
-Abstract \\[5mm]
+The aim of this diploma thesis is comparative analysis and selection of optimal data storage technology among non-relational solutions in the project management system.
+In such a system, it is important to maintain high availability with data consistency.
+The analysis was made in several stages.
 
-\textbf{Keywords:} application, versioning, documents, project, flow
+The first step was presentation and analysis of the way chosen efficient non-relational bases work.
+The methods of storing and organising data, and key mechanisms of these systems have been compared.
+The way they work in a distributed environment is also outlined.
+An important selection criterion are client libraries and access tools, which are also described.
+Useful and not available too commonly in relational systems is the ability to index and search in full-text.
+
+The next step was the implementation and presentation of the construction of the project management system, which was created in three versions differing with the data models used.
+A specification of functional requirements with separated roles in the system and grouped use cases has been described.
+The system architecture was also presented, taking into account its individual layers and the technological stack used.
+
+Finally, a performance analysis was performed using synthetic tests and JMeter application.
+After the designation of comparable metrics and test scenarios, tests were started.
+After the tests, the results were analysed in terms of the response time of the application and the throughput of request processing.
+
+This diploma thesis is an introduction into further development of created system.
+After selection of optimal database, it is possible to divide it into microservices.
+This would allow to check the behaviour of the application in a distributed environment.
+\\[5mm]
+
+\textbf{Keywords:} application, analysis, NoSQL, project, tests
 
 \end{abstract}
 

@@ -1,14 +1,18 @@
-\chapter{Analiza wydajnych baz nierelacyjnych}
+\chapter{Analiza wybranych wydajnych baz nierelacyjnych}
 
-W rozdziale tym zostały przeanalizowane wybrane bazy nierelacyjne: Apache Cassandra i MongoDB.
+W rozdziale tym zostały przeanalizowane wybrane bazy nierelacyjne: Apache Cassandra i~MongoDB.
 Opisowi został poddany model danych, architektura systemu, biblioteki klienckie oraz możliwości indeksowania i wyszukiwania pełnotekstowego. 
+
+Niniejsza praca skupiła się na tych dwóch pracach, ponieważ reprezentują dwie różne podejścia do przechowywania danych. 
+Obie są rozwiązaniami dojrzałymi, sprawdzonymi produkcyjnie przez wiele renomowanych firm.
+Cieszą się dużą popularnością wśród rozwiązań NoSQL oraz wsparciem skupionych wokół nich społeczności.
 
 \section{Apache Cassandra}
 
 Apache Cassandra jest wysoce skalowalną i wydajną, rozproszoną bazą kolumnową.
-Została napisana w języku Java w 2008 roku przez inżynierów firmy Facebook.
-Po udanym starcie i zyskaniu popularności została udostępniona szerokie społeczności przez Apache Incubator.
-W chwili obecnej Cassandra jest najbardziej wydajną kolumnową bazą NoSQL przy zachowaniu pełnej skalowalności na sprzęcie dowolnej klasy.
+Została napisana w języku Java w 2008 roku przez inżynierów firmy Facebook \cite{CassandraOrigins}.
+Po udanym starcie i~zyskaniu popularności została udostępniona szerokie społeczności przez Apache Incubator.
+W~chwili obecnej Cassandra jest jedną z najbardziej wydajnych baz kolumnowych NoSQL przy zachowaniu pełnej skalowalności na sprzęcie dowolnej klasy.
 
 Łączy w sobie cechy dwóch najważniejszych baz danych NoSQL, z punktu widzenia wkładu w rozwój tego zagadnienia: \textit{Google BigTable} oraz \textit{Amazon Dynamo}.
 Model danych tego systemu opiera się w dużej mierze na podejściu zaproponowanym przez Google BigTable.
@@ -26,12 +30,12 @@ Do głównych cech systemu należą:
 
 \subsection{Model danych}
 
-Apache Cassandra wprowadza następujące pojęcia zawiązane z modelem danych:
+Apache Cassandra wprowadza następujące pojęcia zawiązane z modelem danych \cite{cassandraArchitecture}:
 \begin{itemize}
     \item \textbf{kolumna}: krotka (\textit{nazwa, wartość}) wraz ze znacznikiem czasu ustalanym przez klienta,
     \item \textbf{wiersz}: posortowany zbiór kolumn będący atrybutami jednej encji, identyfikowanej przez klucz wiersza,
     \item \textbf{grupa kolumn} (ang. \textit{column family}) zwana też \textbf{tabelą}: posortowany zbiór wierszy; jest to właściwie dwuwymiarową mapą przedstawioną na rysunku \ref{fig:cassandraColumnFamily}.
-    \item \textbf{przestrzeń kluczy} (ang. \textit{keyspace}): zbiór grup kolumn (tabel) dzielących wspólną strategię rozmieszczenia replik danych wśród węzłów klastra. Tworzy również przestrzeń nazw dla tabel i jest porównywana do schmatu w relacyjnych bazach danych.
+    \item \textbf{przestrzeń kluczy} (ang. \textit{keyspace}): zbiór grup kolumn (tabel) dzielących wspólną strategię rozmieszczenia replik danych wśród węzłów klastra. Tworzy również przestrzeń nazw dla tabel i jest porównywana do schematu w relacyjnych bazach danych.
 \end{itemize}
 
 \begin{figure}[!ht]
@@ -54,6 +58,25 @@ Dodatkowe pojęcia łączące model danych z architekturą bazy danych to:
     Nigdy nie mogą wykraczać poza fizyczne lokalizacje.
 \end{itemize}
 
+\subsection{Rola kluczy głównych w tabelach}
+
+Bardzo ważną rolę w projektowaniu modelu danych w bazie Apache Cassandra odgrywają klucze główne tabel.
+Jeżeli chcemy przeszukiwać tabelę według kryterium obejmującego jakąś kolumnę to musi być ona włączona do klucza głównego.
+Podyktowane jest względami wydajnościowymi.
+Przeszukiwanie rozproszonego zbioru danych mogłoby spowodować długie oczekiwanie na odpowiedź.
+Poprawne zdefiniowanie kluczy głównych jest jedną z najważniejszych kwestii podczas projektowania modelu danych w tym systemie.
+
+Klucze główne w tabelach można podzielić na:
+\begin{itemize}
+\begin{samepage}
+    \item \textbf{proste} -- klucze składające się pojedynczej kolumny, która jednocześnie pełni rolę klucza partycjonującego dystrybuującego dane między węzłami sieci.
+\end{samepage}
+
+    \item \textbf{złożone} -- klucze składające się z więcej niż jednej kolumny. 
+    Podczas definicji takiego klucza należy wyznaczyć kolumny należące do klucza partycjonującego (domyślnie pierwsza kolumna w definicji klucza głównego).
+    Pozostałe kolumny, nieuwzględnione w tym kluczu, będą definiować kolejność sortowania wierszy w ramach jednej partycji danych.
+\end{itemize}
+
 \subsection{Zapis danych}
 
 \subsubsection{Commit log}
@@ -64,14 +87,14 @@ Po restarcie uszkodzonego węzła na jego podstawie węzeł jest wstanie powróc
 Zapis operacji do tego dziennika stanowi warunek konieczny do uznania jej za poprawną.
 Poprzez sekwencyjny zapis operacje na danych w Cassandrze są bardzo szybkie - nie trzeba szukać pozycji, gdzie dane mają być zapisane.
 
-Cassandra może dokonywać synchronizacji pamięci cache, reprezentującej ostatnie zmiany w dzienniku, w dwóch trybach:
+Cassandra może dokonywać synchronizacji pamięci cache, reprezentującej ostatnie zmiany w~dzienniku, w dwóch trybach:
 \begin{itemize}
     \item \textbf{okresowym} -- zapisy są natychmiastowo potwierdzane, a commitlog jest po prostu zsynchronizowany z określoną w konfiguracji częstotliwością.
     \item \textbf{wsadowym} -- zapis nie zostanie potwierdzony, zanim dane z dziennika nie zostaną zapisane do pliku dziennika na dysku. 
     W celu uniknięcia dostępu do dysku przy każdym żądaniu, Cassandra oczekuje na kolejne żądania zapisu, aby wykonać je wsadowo. 
     Maksymalny czas oczekiwania określony przez jeden z parametrów konfiguracji.
 \end{itemize}
-Wybór pomiędzy tymi dwoma trybami daje wybór użytkownikowi między pewnością zapisu, a szybkością odpowiedzi. Domyślnym trybem jest tryb wsadowy.
+Wybór pomiędzy tymi dwoma trybami daje wybór użytkownikowi między pewnością zapisu a~szybkością odpowiedzi. Domyślnym trybem jest tryb wsadowy.
 
 \subsubsection{Memtables}
 
@@ -81,7 +104,9 @@ Na jedną tabelę przypada jedna aktywna struktura memtable.
 Ostatecznie, jest ona zapisywana na dysk.
 Zapis jest wyzwalany w momencie gdy:
 \begin{itemize}
+\begin{samepage}
     \item ich rozmiar przekroczy konfigurowalny limit,
+\end{samepage}
     \item commitlog zbliża się do swojego maksymalnego rozmiaru i wymusza zrzut struktur memtables w celu zwolnienia segmentu commitlogu.
     \item upłynie czas określony w konfiguracji systemu.
 \end{itemize}
@@ -89,15 +114,14 @@ Zapis jest wyzwalany w momencie gdy:
 \subsubsection{SSTables}
 
 Struktury memtable są zapisywane na dysku do struktur danych zwanych SSTables (ang.~\textit{Sorted Strings Tables}).
-SSTables jest plikami, w których Cassandra przechowuje fizycznie swoje dane.
+SSTables są plikami, w których Cassandra przechowuje fizycznie swoje dane.
 Raz zapisane SSTable nie może zostać zmienione.
 Pliki te są łączone po przekroczeniu zapisanego w konfiguracji limitu nowo zapisanych plików (ang. \textit{compaction}).
 Ma to zapobiec nadmiernemu przeszukiwaniu wielu plików podczas odczytów.
-
 W skład plików zapisywanych na dysku wchodzą pliki danych, pliki indeksów i pliki filtru Blooma.
 
 Warte uwagi jest to, że w kontraście do baz relacyjnych, zarówno zapis do commitlogu jak i~do SSTable nie zmienia już istniejących plików, w związku z tym nie wymaga przeszukiwania i~odczytu danych z dysku.
-To z kolei przekłada się na bardzo szybkie operacje zapisu Cassandry.
+To z kolei przekłada się na teoretycznie bardzo szybkie operacje zapisu Cassandry.
 
 \subsection{Odczyt danych}
 
@@ -122,9 +146,9 @@ Dokonuje tego dzięki rozproszonej architekturze peer-to-peer, gdzie dane są ro
 \subsubsection{Komunikacja wewnętrzna}
 
 Protokół \textit{gossip} jest protokołem komunikacji peer-to-peer, za pomocą którego węzły okresowo wymieniają między sobą informacje o stanie własnym i innych węzłów, o których mają informację. 
-Proces ten przebiega co sekundę i wymienia komunikaty z maksymalnie trzema innymi węzłami w klastrze.
-Węzły wymieniając informacje o sobie i innych węzłach, o których \enquote{plotkowały}, bardzo szybko doprowadzają do sytuacji, w której każdy węzeł zna stan wszystkich pozostałych węzłów w klastrze.
-Każda \enquote{plotka} ma przypisaną wersję, tak że podczas ich wymiany starsze informacje są nadpisywane najaktualniejszym stanem dla danego węzła. 
+Proces ten przebiega co sekundę i wymienia komunikaty z maksymalnie trzema innymi węzłami w~klastrze.
+Węzły wymieniając informacje o sobie i innych węzłach, o których posiadają informację, bardzo szybko doprowadzają do sytuacji, w której każdy węzeł zna stan wszystkich pozostałych węzłów w klastrze.
+Każda wymienona wiadomość kontrolna ma przypisaną wersję, tak że podczas ich wymiany starsze informacje są nadpisywane najaktualniejszym stanem dla danego węzła. 
 
 Podczas pierwszego uruchamiania klastra ważne jest, aby każdy węzeł posiadał listę węzłów początkowych (ang. \textit{seed nodes}), które przechowują adresy wszystkich węzłów w klastrze.
 Podczas pierwszego cyklu wymiany informacji między węzłami, węzły te inicjują cały proces.
@@ -163,8 +187,8 @@ Czynniki wpływające na replikację obejmują:
 
 \subsubsection{Consistent hashing}
 
-Consistent hashing jest algorytmem pozwalającym na organizację danych w klastrze w rodzaj pierścienia i przypisywanie odpowiednim węzłom odpowiedzialności za poszczególne fragmenty tego pierścienia. 
-Prostym sposobem organizacji danych w pierścień jest przypisanie ich kluczom wartości funkcji skrótu z pewnego zakresu \textit{[0, MAX]}.
+\textit{Consistent hashing} jest algorytmem pozwalającym na organizację danych w klastrze w rodzaj pierścienia i przypisywanie odpowiednim węzłom odpowiedzialności za poszczególne fragmenty tego pierścienia. 
+Prostym sposobem organizacji danych w pierścień jest przypisanie ich kluczom wartości funkcji skrótu z pewnego zakresu \textit{[0, MAX]} \cite{consistentHashing}.
 
 Najprostszy wariant rozłożenia danych pomiędzy węzły przedstawia rysunek \ref{fig:cassandraConsistenHashing}.
 Cztery węzły dzielą między sobą odpowiedzialność za odpowiednie partycje danych, które są podzielone według wyniku funkcji skrótu przyjmującej jako argument klucz główny.
@@ -173,13 +197,13 @@ Kolor węzła odpowiada kolorowi fragmentu pierścienia danych, za który odpowi
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=0.7\textwidth]{figures/consisten_hashing.png}
-\caption{Pierścień danych i ich podział pomiędzy węzły w algorytmie Consistent hashing}
+\caption{Pierścień danych i ich podział pomiędzy węzły w algorytmie \textit{Consistent hashing}}
 \label{fig:cassandraConsistenHashing}
 \end{figure}
 
 \subsubsection{Wirtualne węzły}
 
-Wirtualne węzły (ang. \textit{vnodes}) dzielą dużą partycję przydzieloną fizycznej maszynie na mniejsze partycje danych.
+Wirtualne węzły (ang. \textit{vnodes}) dzielą dużą partycję przydzieloną fizycznej maszynie na mniejsze partycje danych  \cite{virtualNodes}.
 Ułatwia to wiele zadań w systemie:
 \begin{itemize}
     \item Ponowne równoważnie klastra, gdy jest dodawany lub usuwany węzeł.
@@ -198,14 +222,14 @@ Jeśli węzeł przechowujący wiersz ulegnie awarii to tego wiersza już nie da 
 Współczynnik replikacji równy 2~określa dwie kopie tego samego wiersza, każda przechowywana na innym węźle.
 Wszystkie kopie są równie ważne -- nie istnieje główna lub nadrzędna kopia.
 Zasadą jest, że współczynnik replikacji nie powinien przekraczać liczby węzłów w klastrze.
-Można jednak go zwiększyć, a~następnie dodać później wymaganą liczbę węzłów.
+Można jednak go zwiększyć, a~następnie dodać później wymaganą liczbę węzłów \cite{cassandraDataReplication}.
 
 Dostępne są dwie strategie replikacji:
 \begin{itemize}
-    \item \textbf{Prosta strategia} (ang. \textit{SimpleStrategy}): używana wyłącznie w topologiach zawierających jeden węzeł.
+    \item \textbf{Prosta strategia} (ang. \textit{Simple Strategy}): używana wyłącznie w topologiach zawierających jeden węzeł.
     Umieszcza pierwszą replikę na węźle określonym przez moduł partycjonujący.
     Dodatkowe kopie są umieszczane na kolejnych wirtualnych węzłach zgodnie z ruchem wskazówek zegara w pierścieniu bez uwzględnienia topologii klastra.
-    \item \textbf{Strategia topologii sieci} (ang. \textit{NetworkTopologyStrategy}): używana w klastrach z wieloma centrami danych.
+    \item \textbf{Strategia topologii sieciowej} (ang. \textit{Network Topology Strategy}): używana w klastrach z~wieloma centrami danych.
     Określa jak wiele kopii powinno być rozmieszczonych w poszczególnych centrach.
     Strategia ta rozmieszcza repliki na kolejnych fizycznych węzłach zgodnie z ruchem wskazówek zegara w pierścieniu.
     Dzięki temu zmniejsza się podatność na awarię pojedynczych punktów w~sieci.
@@ -233,8 +257,8 @@ Ich zastosowanie nie różni się od ich odpowiednika z baz relacyjnych.
 Ze względu na specyfikę modelu danych w Cassandrze CQL nie posiada operacji złączeń.
 W zakresie manipulacji danymi (DML -- \textit{Data Manipulation Language}) można przyjąć, że CQL jest niepełnym dialektem języka SQL.
 
-Różnicą pomiędzy CQL a SQL jest część odpowiedzialna za manipulację strukrami danych (DDL -- \textit{Data Definition Language}).
-W bazie danych Cassandra nie istnieją struktury znane z baz relacyjnych, dlatego jest brak odpowiadających im poleceń.
+Różnicą pomiędzy CQL a SQL jest część odpowiedzialna za manipulację strukturami danych (DDL -- \textit{Data Definition Language}).
+W bazie danych Cassandra nie istnieją struktury znane z~baz relacyjnych, dlatego jest brak odpowiadających im poleceń.
 Zamiast tego istnieją polecenia pozwalające na tworzenie przestrzeni kluczy i rodzin kolumn.
 
 \subsection{Wsparcie dla wyszukiwania pełnotekstowego}
@@ -243,7 +267,7 @@ Cassandra posiada nieoficjalne wsparcie dla wyszukiwania pełnotekstowego w post
 Elassandra ściśle integruje silnik wyszukiwania pełnotekstowego \textit{Elasticsearch} z bazą danych Cassandra osadzając jego odpowiednio zmodyfikowany kod w każdym węźle Cassandry.
 Elasticsearch tworzy indeks wtórny na potrzeby wyszukiwania tekstowego.
 Dodatkowo udostępnia RESTful API w celu komunikacji z aplikacjami klienckimi. 
-Rola Cassandry sprowadza się do magazynu danych i konfiguracji.
+Rola Cassandry sprowadza się do magazynu danych i konfiguracji \cite{elassandraArchitecture}.
 W przejrzysty sposób ilustruje to rysunek~\ref{fig:elassandraSchema}.
 
 \begin{figure}[!ht]
@@ -286,22 +310,19 @@ MongoDB jest rozproszoną bazą danych, więc wysoka dostępność, skalowanie h
 
 Jedną z funkcjonalności, która wyróżnia MongoDB na tle innych baz NoSQL, takich jak Cassandra, jest możliwość przechowywania w niej dużych plików.
 Odbywa się to przy zastosowaniu specjalnego systemu zapisu \textit{GridFS} \cite{GridFSManual}.
-Dzięki jego wykorzystaniu możliwe jest przechowywanie dużych plików, tak samo jak przechowywane są dokumenty, bez spadku wydajności całego systemu bazodanowego.
+Dzięki jego wykorzystaniu możliwe jest przechowywanie plików, tak samo jak przechowywane są dokumenty, bez spadku wydajności całego systemu bazodanowego.
 
 Kolejnym elementem wartym uwagi, który wyróżnia się od innych systemów NoSQL jest sposób komunikacji.
 Powłoka tej aplikacji funkcjonuje jako interpreter języka \textit{JavaScript}.
 Dzięki temu operowanie na tej bazie sprowadza się do pisania skryptów w tym języku.
 
-\subsection{Model danych}
+\subsection{Model danych} \label{sec:MongoModelDanych}
 
 MongoDB jest bazą danych o modelu danych opartym na dokumentach.
 Dokumenty te są zapisywane we wcześniej wspomnianym formacie BSON.
-Każdy z nich jest przechowywany w jakiejś kolekcji.
+Każdy z nich jest przechowywany w~jakiejś kolekcji.
 Kolekcje są to zbiory dokumentów, które do pewnego stopnia powinny być ze sobą spójne pod względem zawartości, lecz nie ma odgórnego mechanizmu sprawdzającego spójność dokumentów w kolekcji.
 Są one odpowiednikami tabel w relacyjnych bazach danych.
-
-W systemie MongoDB dokumenty w obrębie jednej kolekcji są fizycznie przechowywane w innych plikach na dysku.
-Z tego względu jest odradzane podejście polegające na tworzeniu jednej kolekcji dla wszystkich dokumentów z powodów architektonicznych, jak i wydajnościowych.
 
 Wielkość każdego dokumentu jest ograniczona do 16 MB \cite{DocumentsManual}.
 Nie jest to ograniczenie związane z implementacją tej bazy danych.
@@ -345,17 +366,17 @@ W celu przyspieszenia wyszukiwania w bazie danych MongoDB należy wykorzystać m
 Jest on analogiczny do podejścia znanego z relacyjnych baz danych.
 Indeks można założyć w ramach pojedynczej kolekcji, analogicznie jak to ma miejsce w relacyjnych systemach baz danych, gdzie indeks jest zakładanych na pojedynczej tabeli.
 
-MongoDB udostępnia wiele różnych typów indeksów do obsługi określonych typów danych i zapytań \cite{MongoDBIndexes}:
+MongoDB udostępnia wiele różnych typów indeksów do obsługi określonych typów danych i~zapytań \cite{MongoDBIndexes}:
 \begin{itemize}
     \item \textbf{Indeks na pojedynczym polu}: oprócz domyślnie zdefiniowanego indeksy na polu \textit{\_id}, system ten wspiera tworzenie posortowanych indeksów na pojedynczym polu dokumentu.
     \item \textbf{Indeks złożony}: istnieje możliwość utworzenia indeksów na zestawie pól dokumentu.
     \item \textbf{Indeks typu \textit{multikey}}: używany do indeksowania zawartości przechowywanej w tablicach.
-    Jeżeli użytkownik utworzy indeks indeks na polu przechowującym tablicę, MongoDB wprowadza osobne wpisy w indeksie dla każdego elementu tablicy.
+    Jeżeli użytkownik utworzy indeks na polu przechowującym tablicę, MongoDB wprowadza osobne wpisy w indeksie dla każdego elementu tablicy.
     System ten automatycznie określa, czy ma utworzyć indeks typu \textit{multikey}, sprawdzając czy indeksowane pole zawiera tablicę.
     \item \textbf{Indeks geoprzestrzenny}: specjalny tym indeksu dla danych geoprzestrzennych.
     \item \textbf{Indeks tekstowy}: wspomaga przeszukiwanie pełnotekstowe dokumentów.
     Indeks tego typu analizuje wybrane pola pod względem leksykalnym w danym języku i indeksuje z nich słowa kluczowe w podstawowej formie.
-    \item \textbf{Indeks bazujący na wartości funkcji haszującej}: struktura indeksu jest tworzona z wartości funkcji haszującej wybrane pole dokumentu.
+    \item \textbf{Indeks bazujący na wartości funkcji haszującej}: struktura indeksu jest tworzona z~wartości funkcji haszującej wybrane pole dokumentu.
     Te indeksy mają bardziej losowy rozkład wartości wzdłuż ich zasięgu. 
     Są wykorzystywane tylko do wyszukiwań bazujących na równości i nie wspierają kwerend opartych na zakresie.
     Pomimo to ich głównym zastosowaniem jest wspomaganie partycjonowania danych w klastrze bazując na wartości funkcji skrótu.
@@ -364,11 +385,11 @@ MongoDB udostępnia wiele różnych typów indeksów do obsługi określonych ty
 \subsection{Transakcyjność operacji}
 
 W MongoDB operacje na pojedynczych dokumentach są atomowe.
-Dzięki możliwości przechowywania zagnieżdżonych dokumentów i tablic do przechowywania relacji między danymi w pojedynczym dokumencie, zamiast normalizować je w wiele dokumentów i kolekcji, atomowość operacji na pojedynczym dokumencie eliminuje potrzebę transakcji na wielu dokumentach w wielu przypadkach użycia.
+Dzięki możliwości przechowywania zagnieżdżonych dokumentów i tablic do przechowywania relacji między danymi w~pojedynczym dokumencie, zamiast normalizować je w wiele dokumentów i kolekcji, atomowość operacji na pojedynczym dokumencie eliminuje potrzebę transakcji na wielu dokumentach w~wielu przypadkach użycia.
 
 W sytuacji, gdy wymagana jest atomowość modyfikacji wielu dokumentów lub spójność między odczytami do wielu z nich, MongoDB umożliwia wykonywanie transakcji z wieloma dokumentami w zbiorze replik.
 Takie transakcje można używać w celu wykonywania wielu operacji na kolekcjach, bazach danych i dokumentach.
-Działają zgodnie z zasadą "wszystko albo nic".
+Działają zgodnie z zasadą \enquote{wszystko albo nic}.
 Kiedy transakcja zostanie zatwierdzona, wszystkie zmiany danych dokonane w transakcji zostaną zapisane.
 Jeśli jakakolwiek operacja w transakcji zakończy się niepowodzeniem, zostanie ona przerwana, a wszystkie zmiany danych dokonane w transakcji zostaną odrzucone.
 Do momentu zatwierdzenia żadne operacje zapisu w transakcji nie są widoczne poza nią \cite{MongoDBTransactions}.
@@ -380,8 +401,8 @@ MongoDB składa się z kilku komponentów:
     \item \textbf{mongod} -- usługa, która odpowiada za działanie bazy danych.
     Jest uruchamiana w trybie \textit{daemon} w systemach z rodziny Unix oraz jako \textit{Windows service} w  systemie Windows.
     Jest niezbędna do działania całego systemu i zdolna do samodzielnego wykonania replikacji danych pomiędzy różne węzły sieci.
-    \item \textbf{mongos} -- proces uczestniczący określaniu lokalizacji wyszukiwanych danych w rozproszonym środowisku MongoDB.
-    Dzięki temu baza danych wydaje się tworem spójnym i jednorodnym dla zewnętrznych klientów.
+    \item \textbf{mongos} -- proces uczestniczący w określaniu lokalizacji wyszukiwanych danych w rozproszonym środowisku MongoDB.
+    Dzięki temu baza danych wydaje się tworem spójnym i~jednorodnym dla zewnętrznych klientów.
     \item \textbf{mongo} -- interaktywna konsola JavaScript.
     Dostarcza wszechstronny interfejs dla administratorów systemu, a także sposób dla programistów do testowania zapytań i operacji bezpośrednio na bazie danych.
 \end{itemize}
@@ -389,11 +410,11 @@ MongoDB składa się z kilku komponentów:
 \subsection{Działanie w środowisku rozproszonym}
 
 Podobnie jak Apache Cassandra, MongoDB bardzo dobrze działa w środowisku rozproszonym.
-Posiada wbudowane wsparcie dla mechanizmów partycjonowania, replikacji danych i operacji MapReduce.
+Posiada wbudowane wsparcie dla mechanizmów partycjonowania, replikacji danych i operacji Map/Reduce.
 
 Zbiór replik (ang.~\textit{replica set}) jest grupą instancji \textit{mongod}, które utrzymują ten sam zestaw danych.
 Zawiera on kilka węzłów zawierających dane i opcjonalnie jeden węzeł arbitrażowy.
-Z węzłów zawierających dane jeden i tylko jeden jest uważany za węzeł główny, podczas gdy pozostałe są węzłami drugorzędnymi.
+Z~węzłów zawierających dane jeden i tylko jeden jest uważany za węzeł główny, podczas gdy pozostałe są węzłami drugorzędnymi.
 Replikacja danych jest w pełni asynchroniczna.
 Wybór jednostki głównej spośród węzłów klastra dokonuje się w sposób automatyczny.
 W momencie, gdy węzeł główny nie komunikuje się z pozostałymi członkami zbioru przez więcej niż skonfigurowany \textit{electionTimeoutMillis} okres (domyślnie 10 sekund), jeden z drugorzędnych węzłów ogłasza \enquote{wybory} nowego głównego węzła.
@@ -412,7 +433,7 @@ MongoDB posiada bogatą bazę oficjalnie wspieranych bibliotek klienckich.
 Znajdziemy rozwiązania dostępne w praktycznie wszystkich najpopularniejszych językach programowania, począwszy od C/C++, które można osadzić w aplikacjach popularnej w dzisiejszych czas platformy \textit{Internet of Things}, po Javę i popularne języki skryptowe: Python, PHP, Ruby i JavaScript, popularyzując użycie MongoDB w aplikacjach internetowych.
 
 Istnieją też otwarte rozbudowane środowiska administracyjne dla MongoDB automatyzujące i ułatwiające pracę administratorów.
-Są to m. in. Mongo-Express, Robo 3T (wcześniej znane jako Robomongo) oraz MongoDB Compass (darmowa wersja Community Edition i bardziej rozbudowana jako część płatnego wsparcia dostępnego u twórców bazy danych).
+Są to m. in. Mongo-Express, Robo 3T (wcześniej znane jako Robomongo) oraz MongoDB Compass (w dwóch wersjach: darmowa wersja Community Edition i~bardziej rozbudowana jako część płatnego wsparcia dostępnego u twórców bazy danych).
 
 \subsection{Wyszukiwanie pełnotekstowe}
 
@@ -450,3 +471,7 @@ db.stores.find({$text: {$search: "best -tea shop"}})
 Wyniki wyszukiwanie tekstowego są domyślnie zwracane nieposortowane. 
 Jednakże kwerendy wyszukiwania tekstowego obliczają wynik trafności dla każdego dokumentu, który określa, jak dobrze dokument pasuje do zapytania.
 Taki wynik trafności dopasowania może posłużyć jako kryterium sortowania wyników.
+
+% \section{Inne rozwiązania}
+
+%% ScyllaDB, 
