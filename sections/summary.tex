@@ -1,15 +1,15 @@
 \chapter{Podsumowanie}
 
-W tej pracy dyplomowej zostały porównane dwie wydajne nierelacyjne bazy danych -- Apache Cassandra i MongoDB -- w kontekście ich użycia w systemie służącym do prowadzenia projektów i prostego wersjonowania dokumentów w nich.
+W tej pracy dyplomowej zostały porównane dwie wydajne nierelacyjne bazy danych -- Apache Cassandra i MongoDB -- w kontekście ich użycia w systemie służącym do prowadzenia projektów z prostym wersjonowaniem dokumentów.
 Na początku zostały przeanalizowane sposoby organizacji danych przez poszczególne bazy.
-Tabelaryczny sposób organizacji danych w Cassandrze może przypominać relacyjne bazy danych, lecz jest pozbawiony wszystkiego co powoduje problemy z wydajnością w tego rodzaju bazach.
-Z kolei dokumenty w MongoDB doskonale odzwierciedlają model obiektowy i mogą z łatwością reprezentować dowolny obiekt domeny.
+Tabelaryczny sposób organizacji danych w Cassandrze może przypominać relacyjne bazy danych, lecz jest pozbawiony wszystkiego, co może spowolnić operacje w tego rodzaju bazach -- kosztownych operacji złączeń tabel, więzów integralności i~wyzwalaczy.
+Z kolei dokumenty w MongoDB doskonale odzwierciedlają model obiektowy i mogą z łatwością reprezentować dowolny obiekt domeny biznesowej.
 Przydatną opcją jest możliwość indeksowania dowolnych pól dokumentów w kolekcji, nawet tych zagnieżdżonych, dzięki czemu można przyspieszyć często używane zapytania.
 
-Opisowi zostały poddane również procesy zapisy i odczytu danych oraz sposób pracy w~środowisku rozproszonym.
-Pomimo, że każda z tych baz została stworzona do pracy w tym środowisku reprezentują dwa trochę się różniące podejścia do tego tematu.
+Opisowi zostały poddane również procesy zapisu i odczytu danych oraz sposób pracy w~środowisku rozproszonym.
+Pomimo, że każda z tych baz została stworzona do pracy w tym środowisku reprezentują one dwa trochę różniące się podejścia do tego tematu.
 MongoDB z jednym węzłem nadrzędnym, przyjmującym operacje zapisów, w większym stopniu stawia na spójność danych, ponieważ węzeł ten zarządza replikami danych.
-W inny sposób działa Cassandra, która w środowisku \textit{peer-to-peer}, gdzie każdy węzeł może przyjąć operację zapisu, dąży do jak największej dostępności i bezawaryjności.
+W inny sposób działa Cassandra, która w~środowisku \textit{peer-to-peer}, gdzie każdy węzeł może przyjąć operację zapisu, dąży do jak największej dostępności i bezawaryjności.
 
 Obie bazy danych posiadają bogaty zbiór narzędzi dostępowych i bibliotek klienckich, dzięki czemu wykorzystanie ich w rozwiązaniach różnych problemów jest o wiele łatwiejsze.
 \textit{Cassandra Query Language} jest znacznym ułatwieniem dla osób zaczynających poznawanie nierelacyjnych baz danych, a znających już \textit{SQL}.
@@ -21,7 +21,7 @@ Z kolei Apache Cassandra wymaga integracji z wtyczką silnika wyszukiwania pełn
 Jednakże wraz z tą wtyczką zyskuje większy wachlarz możliwości analizy i wyszukiwania indeksowanych w systemie dokumentów.
 
 W trzecim rozdziale został opisany projekt zaimplementowanego w trzech wersjach systemu.
-Pierwsze dwie wersje bazują na wspomnianych wcześniej bazach NoSQL.
+Pierwsze dwie wersje opierają się na wspomnianych wcześniej bazach NoSQL.
 Trzecia zaś próbuje połączyć w jednym modelu danych relacyjną bazę PostgreSQL i nierelacyjną Cassandrę.
 W tym samym rozdziale znajduje się dokładniejszy opis każdego z tych modeli danych.
 
@@ -37,10 +37,10 @@ Drugi scenariusz składał się z dużej ilości operacji odczytu danych z prakt
 Tym razem bezkompromisowo wygrała wersja systemu podłączona do bazy Apache Cassandra.
 Wąskie gardło modelu hybrydowego stanowiła część relacyjna.
 
-\section*{Wnioski}
+\section*{Wnioski i potencjalne kierunki rozwoju}
 
 Szybki postęp technologiczny i bardzo duża ilość napływających zewsząd danych każą nam zrewidować poglądy na wciąż bardzo popularne relacyjne bazy danych.
-Skłaniając się ku wysoko skalowalnym rozwiązaniom NoSQL trzeba mieć na uwadze, że będziemy musieli zrezygnować (zgodnie z twierdzeniem Brewera o CAP) albo ze spójności danych, albo z bardzo wysokiej dostępności systemu.
+Skłaniając się ku wysoko skalowalnym rozwiązaniom NoSQL trzeba mieć na uwadze, że będziemy musieli zrezygnować (zgodnie z twierdzeniem Brewera o CAP~\cite{BrewerTheorem}) albo ze spójności danych, albo z bardzo wysokiej dostępności systemu.
 Nie ma wśród nich rozwiązań uniwersalnych.
 Wybór też jest w dużej mierze zależny od modelu domeny systemu. 
 W skomplikowanym modelu, przechowywanym w bazie kolumnowej takiej jak Cassandra, zbyt duży stopień denormalizacji i niespójności danych może w~pewnym momencie stać się nie do zaakceptowania.

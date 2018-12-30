@@ -17,11 +17,22 @@ System ten rozwiązywał następujące problemy:
 System ten, z powodu ograniczeń czasowych, nie posiadał rozbudowanej funkcjonalności, stanowił punkt startowy dla narzędzia wspomagającego obieg dokumentów w projektach.
 Warstwa przechowywania danych została zaprojektowana i zaimplementowana z wykorzystaniem relacyjnej bazy danych, o czym zdecydowała dostępność i popularność obecnych na rynku rozwiązań. 
 
-Bazy danych z tej rodziny dominują na rynku od dziesiątek lat, co stanowi fenomen w świecie ciągle zmieniającej się branży informatycznej. 
+Bazy danych z tej rodziny dominują na rynku od wielu lat \cite{DBEnginesRangking}, co jest anomalią w świecie ciągle zmieniającej się branży informatycznej.
 Mimo wielu zalet posiadają one swoje ograniczenia m. in. w postaci sztywnego schematu danych.
 Wraz ze wzrostem złożoności modelu relacyjnej bazy danych rośnie również czas operacji i zapytań do takiej bazy.
-Rosnące wymagania związane z~rozwojem aplikacji internetowych spowodowały powstanie wielu nowych typów baz danych.
+Rosnące wymagania związane z~rozwojem aplikacji internetowych spowodowały powstanie wielu nowych typów baz danych, zwanych \textit{NoSQL}.
 Nowe rozwiązania w różny sposób i w różnym kierunku odchodzą od klasycznego modelu relacyjnego.
+Bazy te rezygnują z postaci relacyjnej i związanego z nimi iloczynu kartezjańskiego na rzecz innych modeli danych.
+Czasami struktury danych używane przez nie są również postrzegane jako bardziej elastyczne.
+Istnieją różne podejścia do klasyfikacji baz danych NoSQL.
+Podstawowa klasyfikacja ze względu na ich model danych obejmuje bazy \cite{NoSQLKompendiumWiedzy}:
+\begin{itemize}
+    \item \textbf{klucz-wartość}, wykorzystujące tablice asocjacyjne do przechowywania danych,
+    \item \textbf{dokumentowe}, przechowujące dane w dokumentach, zapisanych w różnych standardach formatowania (XML, JSON, YAML), które są pogrupowane w kolekcje,
+    \item \textbf{kolumnowe}, przechowujące dane w grupach kolumn, które można interpretować jako dwuwymiarowe bazy typu klucz-wartość,
+    \item \textbf{grafowe} przeznaczone dla danych, których związki są dobrze reprezentowane jako graf.
+\end{itemize}
+
 Dynamiczny rozwój nierelacyjnych baz danych pokazuje, że wymagania stawiane przed nowymi projektami są na tyle duże, że nie można dłużej mówić o uniwersalnym rozwiązaniu każdego problemu, jakim do niedawna mogły wydawać się bazy relacyjne.
 
 \section*{Cel i zakres pracy}
@@ -31,9 +42,9 @@ Analiza posłużyła do wyboru optymalnego rozwiązania, które pozwoliłoby na 
 
 Do celów porównawczych powstał system obiegu dokumentów w projektach w trzech wersjach, w~zależności od wykorzystanej bazy danych:
 \begin{itemize}
-    \item korzystający z bazy MongoDB,
-    \item korzystający z bazy Apache Cassandra,
-    \item korzystający z baz Apache Cassandra i PostgreSQL
+    \item korzystający z bazy dokumentowej MongoDB,
+    \item korzystający z bazy kolumnowej Apache Cassandra,
+    \item korzystający z bazy kolumnowej Apache Cassandra i bazy relacyjnej PostgreSQL.
 \end{itemize}
 Funkcjonalność systemu została dodatkowo rozszerzona o wyszukiwanie pełnotekstowe w przechowywanych w systemie plikach.
 

@@ -11,7 +11,7 @@ Testy zostały przeprowadzone na komputerze stacjonarnym z następującą konfig
     \item \textbf{procesor}: Intel Core i7-3770 (4-rdzeniowy/8-wątkowy taktowany zegarem 3,4 GHz),
     \item \textbf{pamięć operacyjna}: 8 GB,
     \item \textbf{dysk twardy} o pojemności 500 GB (7200 RPM, SATA 6 Gb/s),
-    \item \textbf{system operacyjny}: Microsoft Windows 10 Professional (x64) Build 17134.345
+    \item \textbf{system operacyjny}: Microsoft Windows 10 Professional (x64) Build 17134.345.
 \end{itemize}
 
 Środowisko systemu zostało utworzone z wykorzystaniem narzędzia do konteneryzacji aplikacji jakim jest Docker.
@@ -24,7 +24,7 @@ Ze względu na ograniczenia sprzętowe, spowodowane niedostateczną ilością pa
 
 \section{Narzędzie symulujące obciążenie}
 
-Głównym narzędziem do testowania był program Apache JMeter 5.
+Głównym narzędziem do testowania był program \textit{Apache JMeter~5}\footnote{Strona główna projektu Apache JMeter \url{https://jmeter.apache.org/}}.
 Jest to aplikacja open-source, napisana w języku Java i zaprojektowana do przeprowadzania testów wydajnościowych i~obciążeniowych wielu różnych systemów.
 Pozwala ona symulować realny ruch użytkowników na wiele sposobów.
 Zalety przemawiające za użyciem tego narzędzia to:
@@ -36,11 +36,11 @@ Zalety przemawiające za użyciem tego narzędzia to:
     \item spore możliwości gromadzenia i analizy statystyk.
 \end{itemize}
 
-\section{Porównywane metryki}
+Istnieje niewiele darmowych i równie popularnych alternatywnych rozwiązań dla Apache JMeter. 
+Zazwyczaj są to płatne i zamknięte rozwiązania, takie jak \textit{Loader}\footnote{Strona główna usługi Loader \url{https://loader.io/}}.
+Istnieje również projekt \textit{Gatling}\footnote{Strona główna projektu Gatling \url{https://gatling.io/}}, który podobnie jak JMeter jest darmowy i otwartoźródłowy, lecz posiada uboższy zakres możliwości tworzenia scenariuszy testowych.
 
-%% Jak szybko baza pada
-%% Zmiana czasu odpowiedzi w zależności od obciążenia
-%% Przepustowość
+\section{Porównywane metryki}
 
 Podczas testów zostały zbadane następujące metryki:
 \begin{itemize}
@@ -54,26 +54,33 @@ Dzięki temu udało się zbadać wpływ wybranego modelu i bazy danych na nie.
 \section{Scenariusze testowe}
 
 Wydajność, oprócz niezawodności, jest jednym z głównych czynników decydujących o przydatności bazy danych w warunkach produkcyjnych. 
-Wiele baz danych typu NoSQL szczyci się bardzo wysokim poziomem niezawodności oraz wydajności, dlatego podczas tworzenia scenariuszy testowych skupiłem się na dwóch podstawowych operacjach -- odczytu i zapisu -- w kontekście różnych obciążeń.
+Wiele baz danych typu NoSQL szczyci się bardzo wysokim poziomem niezawodności oraz wydajności, dlatego podczas tworzenia scenariuszy testowych skupiłem się na dwóch podstawowych operacjach -- odczytu i zapisu.
+
+Scenariusze zostały stworzone w interfejsie użytkownika programu JMeter.
+Po ich utworzeniu wykonanie ich odbyło się bez udziału interfejsu graficznego -- z poziomu wiersza poleceń.
+Testy polegały na wysyłaniu żądań HTTP do końcówek RESTowych serwera aplikacyjnego, pomijając całkowicie klienta przeglądarkowego.
+Dzięki temu został pominięty narzut potrzebny na generowanie widoków aplikacji, koncentrując się tylko logice biznesowej systemu.
 
 \subsection{Testy operacji zapisu} \label{sec:zapisScenariusz}
 
 Bezawaryjność i szybkość zapisu danych do bazy w aplikacjach internetowych ma duże znaczenie, zwłaszcza w systemie, w którym często są zapisywane pliki.
 W takim przypadku zapis może być nawet bardziej kosztowny czasowo niż operacja odczytu danych.
-W przy zapisie często też trzeba zadbać o transakcyjność operacji.
+Przy zapisie często też trzeba zadbać o transakcyjność operacji.
 MongoDB w używanej w stworzonym systemie wersji zapewnia wsparcie dla transakcji między wieloma kolekcjami.
 System korzysta z możliwości jaką daje ta baza i operacje zapisu obejmujące wiele kolekcji posiadają kontekst transakcyjny.
 Trochę inaczej wygląda sytuacji w przypadku bazy danych Apache Cassandra -- operacje zapisu są atomowe na poziomie zapisu pojedynczego wiersza.
-Oznacza to, że system musi sam zadbać o~spójność zapisu i wycofać zmiany jeśli cokolwiek pójdzie nie tak.
+Oznacza to, że system musi sam zadbać o~spójność zapisu i wycofać zmiany jeśli którakolwiek operacja się nie powiedzie.
 
 Do testowania operacji zapisu w każdej wersji systemu był użyty scenariusz obejmujący następujące kroki użytkownika:
 \begin{enumerate}
+\begin{samepage}
     \item Zalogowanie się do systemu.
-    \item Utworzenie nowego projektu.
+\end{samepage}
+    \item Utworzenie nowego projektu o nazwie \enquote{Projekt $i$}, gdzie $i$ jest numerem porządkowym symulowanego użytkownika.
     \item W pętli powtarzającej się 10-krotnie użytkownik:
     \begin{enumerate}
-        \item tworzył nowe zadanie,
-        \item dodawał do niego 10 nowych plików do zadania.
+        \item tworzył nowe zadanie o nazwie \enquote{Zadanie $j$}, gdzie $j$ jest numerem iteracji wykonywanej pętli,
+        \item dodawał do niego 10 nowych, takich samych plików DOCX każdy o rozmiarze około 200~KB.
     \end{enumerate}
 \end{enumerate}
 Przed każdym testem baza danych była czyszczona i generowana była odpowiednia liczba użytkowników, a całe środowisko restartowane.
@@ -114,6 +121,7 @@ Operacja ta obejmuje w dużej mierze zapis do bazy Apache Cassandra, który jest
 
 \begin{table}[!ht]
 \centering
+\caption{Wyniki testów zapisu dla 100 równolegle pracujących użytkowników}
 \begin{tabular}{|c|c|c|c|c|c|c|c|}
 \hline
 \multirow{2}{*}{Model danych} & \multicolumn{6}{c|}{Czas odpowiedzi (ms)} & \multirow{2}{*}{\begin{tabular}[c]{@{}c@{}}Przepustowość\\ (zapytania/s)\end{tabular}} \\ \cline{2-7}
@@ -122,7 +130,6 @@ Apache Cassandra & 2818.62 & 169 & 14609 & 3969 & 4628.90 & 8293.25 & 35.06 \\ \
 MongoDB & 2170.88 & 18 & 9420 & 3754 & 4495.95 & 7288.81 & 44.91 \\ \hline
 \begin{tabular}[c]{@{}c@{}}Apache Cassandra\\ + PostgreSQL\end{tabular} & 1581.61 & 11 & 6010 & 2609 & 3027.90 & 3958.98 & 61.12 \\ \hline
 \end{tabular}
-\caption{Wyniki testów zapisu dla 100 równolegle pracujących użytkowników}
 \label{tab:resultsSaveOp}
 \end{table}
 
@@ -156,13 +163,14 @@ Na tym tle najlepiej wyszedł system z bazą MongoDB, gdzie połowa żądań utw
 Testy operacji odczytu danych zostały przeprowadzone z symulacją 1000 użytkowników równolegle odtwarzających scenariusz opisany w sekcji \ref{sec:readTestScenario} dla systemów korzystających wyłącznie z baz Apache Cassandra i MongoDB.
 To przełożyło się na sumaryczną liczbę zapytań do serwera aplikacyjnego równą 213000.
 Próby symulacji dla większej ilości wirtualnych użytkowników powodowały, że czas odpowiedzi wzrastał, a rzeczywista przepustowość nie ulegała zmianom.
-Tabela \ref{tab:resultsReadOp} przedstawia podsumowanie wyników.
-System korzystający wyłącznie z Cassandry osiągną znacznie lepsze rezultaty niż system korzystający z MongoDB.
+Tabela~\ref{tab:resultsReadOp} przedstawia podsumowanie wyników.
+System korzystający wyłącznie z Cassandry osiągnął znacznie lepsze rezultaty niż system korzystający z MongoDB.
 Widać to było również po czasie potrzebnym na ukończenie scenariusz testowego, odpowiednio ok. 13 i 22 minuty.
 Dzięki bardzo szybkim odczytom z Cassandry system był w stanie obsłużyć o 63\% więcej żądań na sekundę, co jest wynikiem imponującym.
 
 \begin{table}[!ht]
 \centering
+\caption{Wyniki testów odczytu danych dla 1000 równolegle pracujących użytkowników}
 \begin{tabular}{|c|c|c|c|c|c|c|c|}
 \hline
 \multirow{2}{*}{Model danych} & \multicolumn{6}{c|}{Czas odpowiedzi (ms)} & \multirow{2}{*}{\begin{tabular}[c]{@{}c@{}}Przepustowość\\ (zapytania/s)\end{tabular}} \\ \cline{2-7}
@@ -170,7 +178,6 @@ Dzięki bardzo szybkim odczytom z Cassandry system był w stanie obsłużyć o 6
 Apache Cassandra & 3732,41 & 17 & 40871 & 3331 & 3590 & 3739 & 266,69 \\ \hline
 MongoDB & 6080,41 & 8 & 124733 & 5888 & 6524,95 & 9127 & 163,45 \\ \hline
 \end{tabular}
-\caption{Wyniki testów odczytu danych dla 1000 równolegle pracujących użytkowników}
 \label{tab:resultsReadOp}
 \end{table}
 
@@ -185,6 +192,7 @@ Była w stanie obsłużyć o~ok.~28\% mniej żądań niż pozostałe dwie wersje
 
 \begin{table}[!ht]
 \centering
+\caption{Wyniki testów odczytu danych dla 100 równolegle pracujących użytkowników}
 \begin{tabular}{|c|c|c|c|c|c|c|c|}
 \hline
 \multirow{2}{*}{Model danych} & \multicolumn{6}{c|}{Czas odpowiedzi (ms)} & \multirow{2}{*}{\begin{tabular}[c]{@{}c@{}}Przepustowość\\ (zapytania/s)\end{tabular}} \\ \cline{2-7}
@@ -193,20 +201,19 @@ Apache Cassandra & 651,19 & 17 & 3090 & 974 & 1096 & 1286 & 146,49 \\ \hline
 MongoDB & 635.89 & 17 & 6212 & 874 & 1055 & 1511,99 & 149,65 \\ \hline
 \begin{tabular}[c]{@{}c@{}}Apache Cassandra\\ + PostgreSQL\end{tabular} & 903,96 & 16 & 39557 & 1112 & 1296,95 & 1743,99 & 106,63 \\ \hline
 \end{tabular}
-\caption{Wyniki testów odczytu danych dla 100 równolegle pracujących użytkowników}
 \label{tab:resultsRead100}
 \end{table}
 
 Jedną z przyczyn słabych wyników modelu hybrydowego były duże czasy odpowiedzi na żądania pobrania informacji o projektach w jakich uczestniczy użytkownik i informacji o samym projekcie.
 Widać to na rysunku \ref{fig:hybridReadResponseTimePercentiles} przedstawiającym wykres czasów odpowiedzi na poszczególne kategorie zapytań w rozkładzie na centyle.
-Można z niego odczytać, że 90\% próbek zapytań z~tej kategorii miało czasy odpowiedzi większe niż 4,5 sekundy w kontraście do próbek z pozostały kategorii, które czas odpowiedzi większy niż 5 sekund miały dla ostatnich 8 centyli.
-Wynika to z tego, że operacja pobrania listy projektów użytkownika wymaga 3 operacji złączenia tabel, kolejno:
+Można z niego odczytać, że 90\%~próbek zapytań z~tej kategorii miało czasy odpowiedzi większe niż 4,5~sekundy w kontraście do próbek z pozostały kategorii, które dla ostatnich 8~centyli miały czas odpowiedzi większy niż 5~sekund.
+Wynika to z tego, że operacja pobrania listy projektów użytkownika wymaga 3~operacji złączenia tabel, kolejno:
 \begin{enumerate}
     \item tabeli \textit{project} z \textit{user}, aby wyszukać projekty, których jest administratorem,
     \item tabeli \textit{project} z \textit{task}, 
     \item tabeli \textit{task} z \textit{user}, aby wyszukać zadania, w których uczestniczy i na podstawie tych zadań pobrać projekty.
 \end{enumerate}
-Pozostałe operacje zawarte w teście są porównywalnie szybkie do odpowiadającym ich zapytań w pozostałych dwóch systemach.
+Pozostałe operacje zawarte w teście są porównywalnie szybkie do odpowiadających im zapytań w pozostałych dwóch systemach.
 
 \begin{figure}[!ht]
 \centering

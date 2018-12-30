@@ -5,108 +5,169 @@ Powstały dwie wersje odpowiednio dla baz Apache Cassandra i MongoDB, oraz trzec
 Główna część systemu powstała jako rezultat pracy inżynierskiej.
 Niniejsza praca bazuje na nim rozszerzając nieznacznie jego funkcjonalność w celu dogłębniejszej analizy możliwości porównywanych baz.
 
-\section{Specyfikacja wymagań funkcjonalnych}
+% \section{Specyfikacja wymagań funkcjonalnych}
 
-Jedną z najważniejszych faz rozwoju oprogramowania jest wyspecyfikowanie wymagań.
-Jest to część inżynierii oprogramowania dostarczająca nam środków i metod umożliwiających zebranie na temat funkcjonalności tworzonej przez nas aplikacji lub systemu komputerowego.
-Popełnienie błędu w tej fazie projektu jest najbardziej kosztowne, ponieważ jest to początkowa faza i błędy w niej popełnione propagują się na kolejne fazy.
+% Jedną z najważniejszych faz rozwoju oprogramowania jest wyspecyfikowanie wymagań.
+% Jest to część inżynierii oprogramowania dostarczająca nam środków i metod umożliwiających zebranie na temat funkcjonalności tworzonej przez nas aplikacji lub systemu komputerowego.
+% Popełnienie błędu w tej fazie projektu jest najbardziej kosztowne, ponieważ jest to początkowa faza i błędy w niej popełnione propagują się na kolejne fazy.
 
-\subsection*{Role i uprawniania użytkowników w systemie}
+% \subsection*{Role i uprawniania użytkowników w systemie}
 
-W opisywanym systemie do prowadzenie projektów można wyróżnić następujące role i powiązane z nimi uprawnienia:
-\begin{itemize}
-    \item \textbf{Użytkownikiem} jest każdy, kto posiada zarejestrowane konto w aplikacji.
-    \item \textbf{Administratorem projektu} staje się użytkownik aplikacji w momencie, gdy stworzy nowy projekt.
-    Daje mu to uprawnienia do:
-    \begin{itemize}
-        \item dodawania nowych zadań w projekcie,
-        \item usuwania istniejących zadań,
-        \item usunięcia administrowanego projektu.
-    \end{itemize}
-    \item \textbf{Uczestnikiem zadania} staje się użytkownik, który został przypisany do zadania przez administratora.
-    Dzięki temu zyskuje uprawnienia do:
-    \begin{itemize}
-        \item dodawania nowego pliku do zadania,
-        \item pobrania wybranej wersji pliku,
-        \item zaznaczenia pliku do zatwierdzenia przez administratora zadania,
-        \item zapisania nowej wersji pliku,
-        \item wyświetlenia szczegółowych informacji o wersji pliku.
-    \end{itemize}
-    \item \textbf{Administratorem zadania} zostaje użytkownik aplikacji, który został wybrany do tego przez administrator projektu podczas tworzenia zadania.
-    Otrzymuje on wtedy następujące przywileje:
-    \begin{itemize}
-        \item możliwość przypisania/usunięcia uczestnika do/z administrowanego zadania,
-        \item możliwość zatwierdzenia ostatecznej wersji pliku,
-        \item możliwość usunięcia pliku.
-    \end{itemize}
-    Oprócz tych uprawnień użytkownik pełniący tą rolę otrzymuje wszystkie uprawniania uczestnika projektu.
-\end{itemize}
+% W opisywanym systemie do prowadzenie projektów można wyróżnić następujące role i powiązane z nimi uprawnienia:
+% \begin{itemize}
+%     \item \textbf{Użytkownikiem} jest każdy, kto posiada zarejestrowane konto w aplikacji.
+%     \item \textbf{Administratorem projektu} staje się użytkownik aplikacji w momencie, gdy stworzy nowy projekt.
+%     Daje mu to uprawnienia do:
+%     \begin{itemize}
+%         \item dodawania nowych zadań w projekcie,
+%         \item usuwania istniejących zadań,
+%         \item usunięcia administrowanego projektu.
+%     \end{itemize}
+%     \item \textbf{Uczestnikiem zadania} staje się użytkownik, który został przypisany do zadania przez administratora.
+%     Dzięki temu zyskuje uprawnienia do:
+%     \begin{itemize}
+%         \item dodawania nowego pliku do zadania,
+%         \item pobrania wybranej wersji pliku,
+%         \item zaznaczenia pliku do zatwierdzenia przez administratora zadania,
+%         \item zapisania nowej wersji pliku,
+%         \item wyświetlenia szczegółowych informacji o wersji pliku.
+%     \end{itemize}
+%     \item \textbf{Administratorem zadania} zostaje użytkownik aplikacji, który został wybrany do tego przez administrator projektu podczas tworzenia zadania.
+%     Otrzymuje on wtedy następujące przywileje:
+%     \begin{itemize}
+%         \item możliwość przypisania/usunięcia uczestnika do/z administrowanego zadania,
+%         \item możliwość zatwierdzenia ostatecznej wersji pliku,
+%         \item możliwość usunięcia pliku.
+%     \end{itemize}
+%     Oprócz tych uprawnień użytkownik pełniący tą rolę otrzymuje wszystkie uprawniania uczestnika projektu.
+% \end{itemize}
 
-Jeden użytkownik może pełnić wiele z wyżej wymienionych ról.
-Pełniąc je dziedziczy wymienione uprawnienia. 
+% Jeden użytkownik może pełnić wiele z wyżej wymienionych ról.
+% Pełniąc je dziedziczy wymienione uprawnienia. 
 
-\subsection*{Przypadki użycia}
+% \subsection*{Przypadki użycia}
 
-Przypadki użycia opisywanego systemu zostały podzielone na dwie grupy funkcjonalne.
-Ma to na celu łatwiejsze zrozumienie oferowanej przez system funkcjonalności.
+% Przypadki użycia opisywanego systemu zostały podzielone na dwie grupy funkcjonalne.
+% Ma to na celu łatwiejsze zrozumienie oferowanej przez system funkcjonalności.
 
-\subsubsection{Funkcjonalność związana z projektami i zadaniami}
+% \subsubsection{Funkcjonalność związana z projektami i zadaniami}
 
-Zbiór przypadków użycia związany z zarządzaniem projektami i zadaniami w systemie:
-\begin{enumerate}
-    \item \textbf{Utworzenie projektu} -- każdy użytkownik systemu może utworzyć i zarządzać swoimi projektami.
-    \item \textbf{Wyświetlenie listy projektów}, w których uczestniczy użytkownik jest wyświetlane tuż po zalogowaniu się do aplikacji.
-    \item \textbf{Wyświetlenie szczegółowych informacji o projekcie wraz z listą zadań} -- użytkownik może wyświetlić informacje o projekcie jeżeli jest uczestnikiem projektu tzn. jest administratorem projektu, lub administratorem lub uczestnikiem zadania.
-    \item \textbf{Wyświetlenie szczegółowych informacji o zadaniu wraz z listą plików} -- użytkownik może wyświetlić informacje o zadaniu jeżeli jest przypisany do niego, lub jest jego administratorem.
-    \item \textbf{Dodanie nowego zadania do projektu} -- uprawniony do tego jest administrator projektu.
-    \item \textbf{Usunięcie zadania} -- uprawniony do tego jest administrator projektu.
-    \item \textbf{Usunięcie projektu} -- uprawniony do tego jest administrator projektu.
-    \item \textbf{Przypisanie nowego uczestnika do zadania} -- ta funkcja jest dostępna dla administratora zadania.
-    \item \textbf{Usunięcie uczestnika z zadania} -- ta funkcja jest dostępna dla administratora zadania.
-\end{enumerate}
+% Zbiór przypadków użycia związany z zarządzaniem projektami i zadaniami w systemie:
+% \begin{enumerate}
+%     \item \textbf{Utworzenie projektu} -- każdy użytkownik systemu może utworzyć i zarządzać swoimi projektami.
+%     \item \textbf{Wyświetlenie listy projektów}, w których uczestniczy użytkownik jest wyświetlane tuż po zalogowaniu się do aplikacji.
+%     \item \textbf{Wyświetlenie szczegółowych informacji o projekcie wraz z listą zadań} -- użytkownik może wyświetlić informacje o projekcie jeżeli jest uczestnikiem projektu tzn. jest administratorem projektu, lub administratorem lub uczestnikiem zadania.
+%     \item \textbf{Wyświetlenie szczegółowych informacji o zadaniu wraz z listą plików} -- użytkownik może wyświetlić informacje o zadaniu jeżeli jest przypisany do niego, lub jest jego administratorem.
+%     \item \textbf{Dodanie nowego zadania do projektu} -- uprawniony do tego jest administrator projektu.
+%     \item \textbf{Usunięcie zadania} -- uprawniony do tego jest administrator projektu.
+%     \item \textbf{Usunięcie projektu} -- uprawniony do tego jest administrator projektu.
+%     \item \textbf{Przypisanie nowego uczestnika do zadania} -- ta funkcja jest dostępna dla administratora zadania.
+%     \item \textbf{Usunięcie uczestnika z zadania} -- ta funkcja jest dostępna dla administratora zadania.
+% \end{enumerate}
 
-\subsubsection{Funkcjonalność związana z plikami i ich wersjami}
+% \subsubsection{Funkcjonalność związana z plikami i ich wersjami}
 
-Przypadki użycia związane z wszystkimi czynnościami, które można wykonać w~związku z~plikami w~obrębie systemu:
-\begin{enumerate}
-    \item \textbf{Wyszukiwanie pełnotekstowe wśród plików zadania/projektu} jest rozszerzeniem funkcjonalności systemu w porównaniu do systemu powstałego w pracy inżynierskiej.
-    Ten przypadek użycia ma na celu zbadanie możliwości i wsparcia wyszukiwania pełnotekstowego przez bazy danych.
-    Wyszukiwanie to jest dostępne dla uczestników projektów i zadań.
-    Można je uruchomić z poziomu widoku listy zadań -- wtedy zostaną przeszukane wszystkie pliki zadań, do których użytkownik ma dostęp.
-    Wyszukiwanie z widoku listy plików w zadaniu ogranicza przeszukiwane pliki do tych, które znajdują się w zadaniu.
-    Po wyświetleniu listy plików dopasowanych do wyszukiwanej frazy można wybrać jeden z nich i przejść do szczegółowych informacji o nim.
-    \item \textbf{Zatwierdzenie pliku} -- przypadek użycia przeznaczony dla administratora zadania. 
-    Może być zrealizowany gdy system wyświetla listę plików przypisanych do zadania. 
-    Po wybraniu pozycji z tej listy administrator wybiera opcję zatwierdzenia. 
-    Po tej czynności plik posiada status zatwierdzony i nie może można go już edytować.
-    \item  \textbf{Usunąć plik} może tylko administrator zadania. 
-    Wraz z plikiem usuwane są wszystkie zapisane wersje. 
-    W celu usunięcia pliku administrator wybiera pozycję z listy plików i~wybiera opcję usunięcia.
-    \item \textbf{Wyświetlenie szczegółów pliku z listą wersji} -- uprawniony do tego jest uczestnik zadania.
-    Może tego dokonać w poziomu widoku listy plików.
-    \item \textbf{Dodanie nowego pliku} -- funkcjonalność dostępna dla każdego uczestnika zadania. 
-    \item \textbf{Pobranie wersji pliku} -- dostępne dla uczestnika zadania. 
-    Po przejściu do widoku listy wersji pliku może wybrać opcję pobrania konkretnej wersji.
-    \item \textbf{Zaznaczenie pliku do zatwierdzenia przez administratora zadania} -- prosty przypadek użycia dostępny dla uczestnika zadania.
-    Po wyświetleniu  szczegółowego widoku informacji o pliku może wybrać opcję oznaczenia pliku do zatwierdzania.
-    \item \textbf{Zapisanie nowej wersji pliku} jest dostępne dla uczestnika zadania z poziomu widoku szczegółowych informacji o pliku.
-    \item \textbf{Wyświetlenie szczegółowych informacji o wersji pliku} -- opcja dostępna dla uczestników zadania.
-\end{enumerate}
+% Przypadki użycia związane z wszystkimi czynnościami, które można wykonać w~związku z~plikami w~obrębie systemu:
+% \begin{enumerate}
+%     \item \textbf{Wyszukiwanie pełnotekstowe wśród plików zadania/projektu} jest rozszerzeniem funkcjonalności systemu w porównaniu do systemu powstałego w pracy inżynierskiej.
+%     Ten przypadek użycia ma na celu zbadanie możliwości i wsparcia wyszukiwania pełnotekstowego przez bazy danych.
+%     Wyszukiwanie to jest dostępne dla uczestników projektów i zadań.
+%     Można je uruchomić z poziomu widoku listy zadań -- wtedy zostaną przeszukane wszystkie pliki zadań, do których użytkownik ma dostęp.
+%     Wyszukiwanie z widoku listy plików w zadaniu ogranicza przeszukiwane pliki do tych, które znajdują się w zadaniu.
+%     Po wyświetleniu listy plików dopasowanych do wyszukiwanej frazy można wybrać jeden z nich i przejść do szczegółowych informacji o nim.
+%     \item \textbf{Zatwierdzenie pliku} -- przypadek użycia przeznaczony dla administratora zadania. 
+%     Może być zrealizowany gdy system wyświetla listę plików przypisanych do zadania. 
+%     Po wybraniu pozycji z tej listy administrator wybiera opcję zatwierdzenia. 
+%     Po tej czynności plik posiada status zatwierdzony i nie może można go już edytować.
+%     \item  \textbf{Usunąć plik} może tylko administrator zadania. 
+%     Wraz z plikiem usuwane są wszystkie zapisane wersje. 
+%     W celu usunięcia pliku administrator wybiera pozycję z listy plików i~wybiera opcję usunięcia.
+%     \item \textbf{Wyświetlenie szczegółów pliku z listą wersji} -- uprawniony do tego jest uczestnik zadania.
+%     Może tego dokonać w poziomu widoku listy plików.
+%     \item \textbf{Dodanie nowego pliku} -- funkcjonalność dostępna dla każdego uczestnika zadania. 
+%     \item \textbf{Pobranie wersji pliku} -- dostępne dla uczestnika zadania. 
+%     Po przejściu do widoku listy wersji pliku może wybrać opcję pobrania konkretnej wersji.
+%     \item \textbf{Zaznaczenie pliku do zatwierdzenia przez administratora zadania} -- prosty przypadek użycia dostępny dla uczestnika zadania.
+%     Po wyświetleniu  szczegółowego widoku informacji o pliku może wybrać opcję oznaczenia pliku do zatwierdzania.
+%     \item \textbf{Zapisanie nowej wersji pliku} jest dostępne dla uczestnika zadania z poziomu widoku szczegółowych informacji o pliku.
+%     \item \textbf{Wyświetlenie szczegółowych informacji o wersji pliku} -- opcja dostępna dla uczestników zadania.
+% \end{enumerate}
 
-\section{Architektura systemu}
+\section{Funkcjonalność systemu}
+
+Główną funkcjonalnością systemu jest tworzenie projektów oraz zarządzanie nimi poprzez dodawanie lub usuwanie zadań.
+Rysunek~\ref{fig:sysFunProject} przedstawia widok z informacjami o szczegółach projektu, do którego ma dostęp zalogowany użytkownik.
+Widzi również na nim listę zadań w~projekcie, w których bierze udział.
+Dodatkowo administrator projektu może z poziomu tego widoku dodawać zadania lub usunąć całkowicie projekt.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/projekt.JPG}
+\caption{Widok szczegółowych informacji o projekcie}
+\label{fig:sysFunProject}
+\end{figure}
+
+Po przejściu do zadania ukazuje się użytkownikowi widok przedstawiony na Rysunku~\ref{fig:sysFunTask}.
+Z poziomu tego widoku może przejść do szczegółowych informacji o wybranym pliku w zadaniu.
+Administrator projektu może przejść do zakładki panelu administracyjnego zadania, który pozwala mu na usunięcie zadania wraz z przypisanymi do niego dokumentami.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/Zadanie.JPG}
+\caption{Widok szczegółowych informacji o zadaniu}
+\label{fig:sysFunTask}
+\end{figure}
+
+Kolejną z funkcji jakie dostarcza system jest proste wersjonowanie dokumentów przechowywanych w zadaniach.
+Służy to np. do zobrazowania postępu w tworzeniu ważnego dokumentu, lub szybkiego sprawdzenia zmian dokonanych przez innych użytkowników.
+W ramach rozszerzenia funkcjonalności systemu powstało wyszukiwanie pełnotekstowe plików.
+Funkcjonalność ta została stworzona w ramach niniejszej pracy w celu zbadania możliwości wyszukiwania pełnotekstowego oferowanego przez porównywane bazy nierelacyjne.
+
+Z poziomu przedstawionych wcześniej widoków szczegółowych informacji o projekcie i zadaniu możliwe jest wyszukiwanie plików zawierających zadaną frazę.
+Wystarczy wpisać ją w pole znajdujące się w prawym górnym rogu i nacisnąć klawisz \textit{Enter}.
+Następnie aplikacja wyświetla listę dopasowanych dokumentów, wraz z ich nazwami, oraz nazwami zadań, do których są przypisane.
+Rysunek~\ref{fig:sysFunSearch} przedstawia przykładowy widok wyników wyszukiwania.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/wyniki_wyszukiwania.JPG}
+\caption{Widok wyników wyszukiwania zadanej frazy}
+\label{fig:sysFunSearch}
+\end{figure}
+
+Z listy plików w zadaniu i wyników wyszukiwania możliwe jest przejście do szczegółowych informacji o pliku.
+Rysunek~\ref{fig:sysFunFile} przedstawia przykładowy widok informacji o pliku.
+Znajduje się na nim lista jego wersji posortowana w odwrotnej kolejności chronologicznej.
+Każdą z tych wersji można pobrać lub wyświetlić jej zawartość tekstową.
+Uczestnik zadania może również dodać kolejną wersję pliku.
+Administrator zadania może zatwierdzić plik, dzięki czemu nie będzie już możliwe dodanie jego nowej wersji.
+Jest też możliwość usunięcia pliku przez administratora zadania, wraz z jego całą historią wersji.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/plik.jpg}
+\caption{Widok szczegółowych informacji o pliku}
+\label{fig:sysFunFile}
+\end{figure}
+
+\section{Architektura systemu i zakres zmian}
 
 System został zaprojektowany i zaimplementowany zgodnie z architekturą wielowarstwową jako aplikacja internetowa.
 Składa się z dwóch aplikacji: klienta przeglądarkowego i serwera aplikacyjnego.
 Można wyróżnić w nim następujące warstwy:
 \begin{itemize}
     \item \textbf{warstwa dostępu do danych} -- nadaje poziom abstrakcji ukrywając technologię stojącą za przechowywaniem danych systemu.
-    Na jej poziomie następują bezpośrednie połączenia z konkretną bazą danych i komunikacją z nią.
-    Dzięki niej wymiana bazy danych sprowadza się do zmian we właśnie tej warstwie.
+    Na jej poziomie następują bezpośrednie połączenia z~konkretną bazą danych i~komunikacją z~nią.
+    Dzięki niej wymiana bazy danych sprowadziła się do zmian we właśnie tej warstwie.
     \item \textbf{warstwa logiki biznesowej} -- odpowiedzialna za główną logikę aplikacji, koordynuje jej pracę. 
     Ponadto jest odpowiedzialna za przetwarzanie i przekazywanie danych między warstwą dostępu do danych, a warstwą kontrolerów.
+    Zmiany w tej warstwie ograniczyły się do sposobu użycia komponentów służących do dostępu do danych.
     \item \textbf{warstwa kontrolerów} -- najbardziej zewnętrzna warstwa w serwerze aplikacyjnym, wystawia sieciowy interfejs programowania aplikacji (ang.~\textit{WebAPI}) dla klienta przeglądarkowego.
     Jest odpowiedzialna za przyjmowanie i odpowiadanie żądania od niego poprzez wywoływanie odpowiednich procedur warstwy logiki biznesowej.
+    Wymiana bazy danych nie powodowała jakichkolwiek zmian w tej warstwie systemu.
+    Jest ona całkowicie niezależna od zastosowanej bazy i modelu danych.
     \item \textbf{warstwa prezentacji} -- klient przeglądarkowy, stanowi główny interfejs dla użytkownika systemu.
+    Komunikuje się z warstwą kontrolerów i podobnie jak ona nie uległ jakimkolwiek modyfikacjom podczas zmiany bazy danych. 
 \end{itemize}
 
 \section{Stos technologiczny}
@@ -194,7 +255,7 @@ W systemie można wyróżnić następujące encje i ich atrybuty, które został
         \item suma kontrolna służąca do weryfikacji poprawności odczytu pliku i do szybkiego porównania czy nowa wersja jest rzeczywiście inna od poprzednich,
         \item autor, który zapisał wersję,
         \item lista zmian względem poprzedniej wersji,
-        \item właściwy plik, który został przesłany w postaci binarnej -- może zostać pobrany z systemu przez innych uczestników zadania,
+        \item właściwy plik, który został przesłany w~postaci binarnej -- może zostać pobrany z~systemu przez innych uczestników zadania,
         \item sparsowana zawartość pliku w postaci tekstowej, która podlega analizie i indeksowaniu w celu możliwości przeszukiwania pełnotekstowego pliku.
     \end{itemize}
     
@@ -218,9 +279,23 @@ Rysunek \ref{fig:domainObjects} obrazuje wszystkie wymienione encje na diagramie
 \label{fig:domainObjects}
 \end{figure}
 
-\subsection{Apache Cassandra + Elasticsearch} \label{sec:ModelDanychCassandra}
+\subsection*{Model danych przed dokonaniem zmian}
 
-Pierwsza z wersji systemu korzysta z modyfikacji bazy danych Apache Cassandra w wersji 3.11 zintegrowanej z wtyczką Elasticsearch w wersji 6.2.3 o nazwie Elassandra.
+Przed dokonaniem zmian w warstwie dostępu do danych, system korzystał z relacyjnej bazy PostgreSQL~9.6.
+Rysunek~\ref{fig:ModelPrzed} przedstawia diagram tabel schematu bazodanowego, z którego korzystał system przed zmianą bazy danych.
+Większość tego modelu została przeniesiona do wersji systemu korzystającego z hybrydowego modelu danych i odpowiednio rozszerzona.
+Opis tych tabel znajduje się w~sekcji~\ref{sec:hybridModel} na stronie~\pageref{sec:hybridModel}.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.7\textwidth]{figures/diagram_przed.png}
+\caption{Diagram tabel modelu relacyjnego przed dokonaniem zmian}
+\label{fig:ModelPrzed}
+\end{figure}
+
+\subsection{Model danych w Apache Cassandra + Elasticsearch} \label{sec:ModelDanychCassandra}
+
+Pierwsza z wersji systemu korzysta z modyfikacji bazy danych Apache Cassandra w wersji~3.11 zintegrowanej z wtyczką Elasticsearch w~wersji~6.2.3 o~nazwie Elassandra.
 Z powodu braku operacji złączenia w zapytaniach do Cassandry i potrzeby obsługi tej czynności po stronie aplikacji, część danych wymagała denormalizacji w celu skrócenia czasu potrzebnego na ich odczyt.
 Dodatkowej konfiguracji wymagało mapowanie indeksu wtyczki Elasticsearch na wybraną tabelę.
 
@@ -228,9 +303,10 @@ Dodatkowej konfiguracji wymagało mapowanie indeksu wtyczki Elasticsearch na wyb
 
 Na potrzeby aplikacji powstały następujące niestandardowe typy danych, które zostały wykorzystane w definicjach tabel:
 \begin{itemize}
-    \begin{minipage}{\linewidth}
     \item \textbf{difference} -- struktura reprezentująca pojedynczą zmianę w dokumencie.
-    Zawiera pola przedstawione na listingu \ref{lst:cassandraDifferenceUDT}
+    Zawiera pola przedstawione na listingu \ref{lst:cassandraDifferenceUDT}.
+    
+    \begin{minipage}{\linewidth}
     \begin{lstlisting}[language=CQL,caption={Definicja niestandardowego typu \textit{difference}},label={lst:cassandraDifferenceUDT}]
 CREATE TYPE difference (
     difference_type text,
@@ -242,9 +318,10 @@ CREATE TYPE difference (
     \end{lstlisting}
     \end{minipage}
     
-    \begin{minipage}{\linewidth}
     \item \textbf{user\_summary} -- typ przechowujący krótkie podsumowanie informacji o użytkowniku.
     Składa się z pól przedstawionych na listingu \ref{lst:cassandraUserSummaryUDT}.
+    
+    \begin{minipage}{\linewidth}
     \begin{lstlisting}[language=CQL,caption={Definicja niestandardowego typu \textit{user\_summary}},label={lst:cassandraUserSummaryUDT}]
 CREATE TYPE user_summary (
     email text,
@@ -269,7 +346,7 @@ CREATE TYPE file_summary (
     
     \begin{minipage}{\linewidth}
     \item \textbf{version\_summary} -- niestandardowy typ przechowujący krótkie podsumowanie informacji o wersji pliku.
-    Składa się pól przedstawionych na listingu \ref{lst:cassandraVersionSummaryUDT}.
+    Składa się z pól przedstawionych na listingu \ref{lst:cassandraVersionSummaryUDT}.
     \begin{lstlisting}[language=CQL,caption={Definicja niestandardowego typu \textit{version\_summary}},label={lst:cassandraVersionSummaryUDT}]
 CREATE TYPE version_summary (
     modification_author frozen<user_summary>,
@@ -280,7 +357,7 @@ CREATE TYPE version_summary (
     \end{minipage}
 \end{itemize}
 
-\subsubsection{Tabele}
+\subsubsection{Grupy kolumn (nazywane w Cassandrze również tabelami)}
 
 Model danych stworzonej aplikacji obejmuje następujące tabele:
 \begin{itemize}
@@ -410,7 +487,7 @@ CREATE TABLE version (
 
 \subsubsection{Konfiguracja indeksowania tekstowego} \label{sec:cassandraTextIndexConfig}
 
-W celu wyszukiwania pełnotekstowego zawartości plików indeksowaniu przez wtyczkę Elasticsearch podlegała tylko tabela \textit{version},
+W celu wyszukiwania pełnotekstowego zawartości plików tylko tabela \textit{version} podlegała indeksowaniu przez wtyczkę Elasticsearch,
 a dokładnie jej kolumny:
 \begin{itemize}
     \item \textit{file\_id} -- identyfikator pliku,
@@ -420,7 +497,7 @@ a dokładnie jej kolumny:
     \item \textit{parsed\_file\_content} -- sparsowana zawartość pliku.
 \end{itemize}
 
-\subsection{MongoDB}
+\subsection{Model danych w MongoDB}
 
 Druga wersja systemu korzysta z bazy danych MongoDB w wersji 4.0.
 Wszystkie powiązania do dokumentów, które są w innych kolekcjach zostały zaimplementowane z pomocą odwołania typu \textit{DBRef}, które zostały dokładniej opisane w sekcji \ref{sec:MongoModelDanych} na stronie \pageref{sec:MongoModelDanych}.
@@ -447,7 +524,7 @@ Model danych aplikacji obejmuje następujące kolekcje:
     Pola ze sparsowaną zawartością pliku i wiadomością kontrolną autora podlegają indeksowaniu pełnotekstowemu.
 \end{itemize}
 
-\subsection{Model hybrydowy}
+\subsection{Model hybrydowy} \label{sec:hybridModel}
 
 Trzecia wersja systemu bazuje na modelu hybrydowym -- dane \enquote{relacyjne} są przechowywane w bazie PostgreSQL 10, a krytyczne dla działania i wydajności systemu dane są przechowywane w bazie Apache Cassandra 3.11, wspomnianej w sekcji \ref{sec:ModelDanychCassandra}.
 
@@ -455,10 +532,10 @@ Przez dane krytyczne dla działania i wydajności systemu przyjęto informacje o
 
 \subsubsection{Część relacyjna}
 
-Część relacyjna modelu hybrydowego działa w oparciu o bazę PostgreSQL 10, która jest jedną z najpopularniejszych i najbardziej dojrzałym darmowym rozwiązań wśród baz relacyjnych.
+Część relacyjna modelu hybrydowego działa w oparciu o bazę PostgreSQL 10, która jest jedną z najpopularniejszych i najbardziej dojrzałych darmowych rozwiązań wśród baz relacyjnych~\cite{DBEnginesRankingRDBMS}.
 Ta część modelu powstała w oparciu o model domeny.
 Na podstawie klas i ich atrybutów zostały zaprojektowane tabele.
-Diagram przedstawiający ten fragment modelu znajduje się na rysunku~\ref{fig:postgreModelDiag}.
+Diagram przedstawiający ten fragment modelu znajduje się na Rysunku~\ref{fig:postgreModelDiag}.
 
 \begin{figure}[!ht]
 \centering
