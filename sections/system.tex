@@ -288,7 +288,7 @@ Opis tych tabel znajduje się w~sekcji~\ref{sec:hybridModel} na stronie~\pageref
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=0.7\textwidth]{figures/diagram_przed.png}
+\includegraphics[width=0.85\textwidth]{figures/diagram_przed.png}
 \caption{Diagram tabel modelu relacyjnego przed dokonaniem zmian}
 \label{fig:ModelPrzed}
 \end{figure}
@@ -301,196 +301,68 @@ Dodatkowej konfiguracji wymagało mapowanie indeksu wtyczki Elasticsearch na wyb
 
 \subsubsection{Niestandardowe struktury danych} \label{sec:cassadnraUDFs}
 
-Na potrzeby aplikacji powstały następujące niestandardowe typy danych, które zostały wykorzystane w definicjach tabel:
+Na potrzeby aplikacji powstały niestandardowe typy danych, które zostały użyte w definicjach grup kolumn.
+Rysunek~\ref{fig:CassandraUtd} przedstawia diagram z definicjami tych struktur.
+Wśród nich możemy wyróżnić następujące typy:
 \begin{itemize}
     \item \textbf{difference} -- struktura reprezentująca pojedynczą zmianę w dokumencie.
-    Zawiera pola przedstawione na listingu \ref{lst:cassandraDifferenceUDT}.
-    
-    \begin{minipage}{\linewidth}
-    \begin{lstlisting}[language=CQL,caption={Definicja niestandardowego typu \textit{difference}},label={lst:cassandraDifferenceUDT}]
-CREATE TYPE difference (
-    difference_type text,
-    new_section_size bigint,
-    new_section_start bigint,
-    previous_section_size bigint,
-    previous_section_start bigint
-);
-    \end{lstlisting}
-    \end{minipage}
-    
     \item \textbf{user\_summary} -- typ przechowujący krótkie podsumowanie informacji o użytkowniku.
-    Składa się z pól przedstawionych na listingu \ref{lst:cassandraUserSummaryUDT}.
-    
-    \begin{minipage}{\linewidth}
-    \begin{lstlisting}[language=CQL,caption={Definicja niestandardowego typu \textit{user\_summary}},label={lst:cassandraUserSummaryUDT}]
-CREATE TYPE user_summary (
-    email text,
-    first_name text,
-    last_name text
-);
-    \end{lstlisting}
-    \end{minipage}
-    
-    \begin{minipage}{\linewidth}
     \item \textbf{file\_summary} -- struktura przechowująca krótkie podsumowanie informacji o pliku.
-    Zawiera pola przedstawione na listingu \ref{lst:cassandraFileSummaryUDT}.
-    \begin{lstlisting}[language=CQL,caption={Definicja niestandardowego typu \textit{file\_summary}},label={lst:cassandraFileSummaryUDT}]
-CREATE TYPE file_summary (
-    modification_author frozen<user_summary>,
-    modification_date timestamp,
-    name text,
-    task_name text
-);
-    \end{lstlisting}
-    \end{minipage}
-    
-    \begin{minipage}{\linewidth}
     \item \textbf{version\_summary} -- niestandardowy typ przechowujący krótkie podsumowanie informacji o wersji pliku.
-    Składa się z pól przedstawionych na listingu \ref{lst:cassandraVersionSummaryUDT}.
-    \begin{lstlisting}[language=CQL,caption={Definicja niestandardowego typu \textit{version\_summary}},label={lst:cassandraVersionSummaryUDT}]
-CREATE TYPE version_summary (
-    modification_author frozen<user_summary>,
-    save_date timestamp,
-    version text
-);
-    \end{lstlisting}
-    \end{minipage}
 \end{itemize}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/cassandra_udt.png}
+\caption{Niestandardowe typy danych używanych przez system w~bazie Apache Cassandra}
+\label{fig:CassandraUtd}
+\end{figure}
 
 \subsubsection{Grupy kolumn (nazywane w Cassandrze również tabelami)}
 
-Model danych stworzonej aplikacji obejmuje następujące tabele:
+Rysunek~\ref{fig:CassandraTables} przedstawia diagram grup kolumn w~przestrzeni kluczy wykorzystywanej przez system.
+W~przedstawionym modelu danych możemy wyróżnić następujące tabele:
 \begin{itemize}
-    %% USER
+\begin{samepage}
     \item \textbf{user} -- tabela przechowująca dane o użytkownikach korzystających z systemu.
-    Zawiera kolumny przedstawione na listingu \ref{lst:cassandraUserTable}.
+\end{samepage}
 
-    \begin{minipage}{\linewidth}
-    \begin{lstlisting}[language=CQL,caption={Definicja tabeli \textit{user}},label={lst:cassandraUserTable}]
-CREATE TABLE user (
-    email text PRIMARY KEY,
-    first_name text,
-    last_name text,
-    password text
-);
-    \end{lstlisting}
-    \end{minipage}
-
-    %% PROJECT
     \item \textbf{project} -- tabela przechowująca informacje o projektach.
-    Zawiera kolumny przedstawione na listingu \ref{lst:cassandraProjectTable}.
-    
-    \begin{minipage}{\linewidth}
-    \begin{lstlisting}[language=CQL,caption={Definicja tabeli \textit{project}},label={lst:cassandraProjectTable}]
-CREATE TABLE project (
-    id uuid PRIMARY KEY,
-    administrator frozen<user_summary>,
-    creation_date timestamp,
-    description text,
-    name text
-);
-    \end{lstlisting}
-    \end{minipage}
-    
-    %% USER_PROJECT
+
     \item \textbf{user\_project} -- specjalna tabela przechowująca relację uczestnik projektu -- projekt. 
     Powstała w celu szybkiej weryfikacji czy dany użytkownik jest uczestnikiem projektu.
-    Oprócz identyfikatorów użytkownika i projektu tabela zawiera informacje podsumowujące projekt, które są widoczne na listingu \ref{lst:cassandraUserProjectTable}. 
+    Oprócz identyfikatorów użytkownika i projektu tabela zawiera informacje podsumowujące projekt. 
     Dane te są wyświetlane na liście projektów widocznej tuż po zalogowaniu do systemu.
     Powstała redundancja jest jednak rekompensowana szybkością operacji odczytu danych.
-    
-    \begin{minipage}{\linewidth}
-    \begin{lstlisting}[language=CQL,caption={Definicja tabeli \textit{user\_project}},label={lst:cassandraUserProjectTable}]
-CREATE TABLE user_project (
-    user_email text,
-    project_id uuid,
-    creation_date timestamp,
-    last_modified_file frozen<file_summary>,
-    name text,
-    number_of_files bigint,
-    number_of_participants bigint,
-    number_of_tasks bigint,
-    PRIMARY KEY (user_email, project_id)
-) WITH CLUSTERING ORDER BY (project_id ASC);
-    \end{lstlisting}
-    \end{minipage}
-    
-    %% TASK
+
     \item \textbf{task} -- tabela przechowująca dane o zadaniach w systemie.
-    Składa się z kolumn przedstawionych na listingu \ref{lst:cassandraTaskTable}.
     Klucz główny jest złożony z kolumn \textit{project\_id} i \textit{task\_id}. 
     Kolumna \textit{project\_id} jest kluczem partycjonującym co zapewnia, że dane o zadaniach z jednego projektu będą przetrzymywane w jednym węźle.
     Kluczem sortującym dane w partycji jest kolumna \textit{task\_id}.
-    
-    \begin{minipage}{\linewidth}
-    \begin{lstlisting}[language=CQL,caption={Definicja tabeli \textit{task}},label={lst:cassandraTaskTable}]
-CREATE TABLE task (
-    project_id uuid,
-    task_id uuid,
-    administrator frozen<user_summary>,
-    creation_date timestamp,
-    description text,
-    last_modified_file frozen<file_summary>,
-    name text,
-    number_of_files bigint,
-    participants set<frozen<user_summary>>,
-    PRIMARY KEY (project_id, task_id)
-) WITH CLUSTERING ORDER BY (task_id ASC);
-    \end{lstlisting}
-    \end{minipage}
-    
+
     \item \textbf{file\_metadata} -- tabela przechowująca dane o plikach zapisanych w systemie.
-    Składa się z kolumn przedstawionych na listingu \ref{lst:cassandraFileMetadataTable}.
     Kluczem partycjonującym jest kolumna \textit{task\_id}, przez co informacje o plikach z jednego zadania są przechowywane na jednym węźle klastra.
     Dane w pojedynczej partycji są posortowane rosnąco według wartości w kolumnie \textit{file\_id}.
-    
-    \begin{minipage}{\linewidth}
-    \begin{lstlisting}[language=CQL,caption={Definicja tabeli \textit{file\_metadata}},label={lst:cassandraFileMetadataTable}]
-CREATE TABLE file_metadata (
-    task_id uuid,
-    file_id uuid,
-    confirmed boolean,
-    content_type text,
-    creation_date timestamp,
-    description text,
-    latest_version frozen<version_summary>,
-    marked_to_confirm boolean,
-    name text,
-    number_of_versions bigint,
-    task_name text,
-    PRIMARY KEY (task_id, file_id)
-) WITH CLUSTERING ORDER BY (file_id ASC);
-    \end{lstlisting}
-    \end{minipage}
-    
+
     \item \textbf{version} -- w tej tabeli przechowywane są dane o pojedynczej wersji pliku, wliczając w~to informacje o autorze modyfikacji, listę różnic względem poprzedniej wersji i zawartość pliku.
-    Wszystkie kolumny składające się na tabele są wypisane na listingu \ref{lst:cassandraVersionTable}.
     Kluczem partycjonującym jest kolumna \textit{file\_id}, a dane są posortowane w odwrotnym porządku chronologicznym według kolumny \textit{save\_date}, przez co wyszukanie najnowszej wersji pliku, lub wybór wersji z danego przedziału czasowego jest bardzo szybki.
-    
-    \begin{minipage}{\linewidth}
-    \begin{lstlisting}[language=CQL,caption={Definicja tabeli \textit{version}},label={lst:cassandraVersionTable}]
-CREATE TABLE version (
-    file_id uuid,
-    save_date timestamp,
-    author frozen<user_summary>,
-    check_sum text,
-    differences list<frozen<difference>>,
-    file_content blob,
-    message text,
-    parsed_file_content text,
-    version_string text,
-    PRIMARY KEY (file_id, save_date)
-) WITH CLUSTERING ORDER BY (save_date DESC);
-    \end{lstlisting}
-    \end{minipage}
 \end{itemize}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/cassandra_tables.png}
+\caption{Grupy kolumn używane przez opisywany system w~bazie Apache Cassandra}
+\label{fig:CassandraTables}
+\end{figure}
 
 \subsubsection{Konfiguracja indeksowania tekstowego} \label{sec:cassandraTextIndexConfig}
 
 W celu wyszukiwania pełnotekstowego zawartości plików tylko tabela \textit{version} podlegała indeksowaniu przez wtyczkę Elasticsearch,
 a dokładnie jej kolumny:
 \begin{itemize}
+\begin{samepage}
     \item \textit{file\_id} -- identyfikator pliku,
+\end{samepage}
     \item \textit{save\_date} -- data zapisu wersji,
     \item \textit{version\_string} -- wprowadzony przez autora numer wersji,
     \item \textit{message} -- wiadomość kontrolna,
@@ -501,9 +373,9 @@ a dokładnie jej kolumny:
 
 Druga wersja systemu korzysta z bazy danych MongoDB w wersji 4.0.
 Wszystkie powiązania do dokumentów, które są w innych kolekcjach zostały zaimplementowane z pomocą odwołania typu \textit{DBRef}, które zostały dokładniej opisane w sekcji \ref{sec:MongoModelDanych} na stronie \pageref{sec:MongoModelDanych}.
-Dzięki temu dołączona do aplikacji biblioteka \textit{Spring Data for MongoDB} pobiera, gdy to jest potrzebne, powiązane dokumenty. 
+Dzięki temu dołączona do aplikacji biblioteka \textit{Spring Data for MongoDB} pobiera powiązane dokumenty, gdy zajdzie potrzeba. 
 Każda, niżej wymieniona, kolekcja przechowuje zserializowane obiekty odpowiadającej jej klasy w aplikacji.
-
+Rysunek~\ref{fig:MongoSchema} przedstawia diagram kolekcji w~bazie danych utworzonej przez system.
 Model danych aplikacji obejmuje następujące kolekcje:
 \begin{itemize}
     \item \textbf{user} -- kolekcja przechowująca informacje o zarejestrowanych użytkownikach.
@@ -524,9 +396,16 @@ Model danych aplikacji obejmuje następujące kolekcje:
     Pola ze sparsowaną zawartością pliku i wiadomością kontrolną autora podlegają indeksowaniu pełnotekstowemu.
 \end{itemize}
 
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/mongo_model.png}
+\caption{Kolekcje i~związki między nimi w~bazie MongoDB wykorzystywanej przez opisywany system}
+\label{fig:MongoSchema}
+\end{figure}
+
 \subsection{Model hybrydowy} \label{sec:hybridModel}
 
-Trzecia wersja systemu bazuje na modelu hybrydowym -- dane \enquote{relacyjne} są przechowywane w bazie PostgreSQL 10, a krytyczne dla działania i wydajności systemu dane są przechowywane w bazie Apache Cassandra 3.11, wspomnianej w sekcji \ref{sec:ModelDanychCassandra}.
+Trzecia wersja systemu bazuje na modelu hybrydowym -- dane \enquote{relacyjne} są przechowywane w~bazie PostgreSQL~10, a~krytyczne dla działania i~wydajności systemu dane są przechowywane w~bazie Apache Cassandra~3.11, wspomnianej w~sekcji~\ref{sec:ModelDanychCassandra}.
 
 Przez dane krytyczne dla działania i wydajności systemu przyjęto informacje o wersjach plików, które mogą być najczęściej czytane, dodawane i modyfikowane przez użytkowników aplikacji.
 
@@ -546,8 +425,10 @@ Diagram przedstawiający ten fragment modelu znajduje się na Rysunku~\ref{fig:p
 
 W tej części modelu możemy wyróżnić następujące tabele:
 \begin{itemize}
+\begin{samepage}
     \item \textbf{Tabela użytkowników -- user} \\ 
     Posiada dwa indeksy w celu przyspieszenia wyszukiwania użytkowników -- jeden na kluczu głównym, a drugi na kolumnie \textit{email}.
+\end{samepage}
     
     \item \textbf{Tabela projektów -- project} \\
     Zawiera klucz obcy odnoszący się do rekordu w tabeli \textit{user}. 
@@ -568,27 +449,19 @@ W tej części modelu możemy wyróżnić następujące tabele:
 
 \subsubsection{Część nierelacyjna}
 
-Część nierelacyjna oparta na Cassandrze 3.11 z wtyczką Elasticsearch 6.3.2 składa się jednej tabeli o nazwie \textit{version}.
+Część nierelacyjna oparta na Cassandrze 3.11 z wtyczką Elasticsearch 6.3.2 składa się z~jednej tabeli o nazwie \textit{version}.
 Używa ona niestandardowych struktur danych, których definicje zostały opisane w sekcji \ref{sec:cassadnraUDFs} na stronie \pageref{sec:cassadnraUDFs}.
-Różni się ona od tabeli \textit{version} z modelu bazującego w~całości na Cassandrze tym, że kolumna \textit{file\_id} jest typu \textit{bigint}.
-Ma to na celu przechowywanie identyfikatorów plików, które w bazie PostgreSQL są liczbami całkowitymi.
-Definicja tabeli \textit{version} została przedstawiona na listingu \ref{lst:cassandraHybridVersionTable}.
+Różnica między nią, a~tabelą \textit{version} z modelu bazującego w~całości na Cassandrze, polega na tym, że kolumna \textit{file\_id} jest typu \textit{bigint}.
+Ma to na celu przechowywanie identyfikatorów plików, które w~bazie PostgreSQL są liczbami całkowitymi.
+Rysunek~\ref{fig:hybridCassandraPart} przedstawia diagram z~definicją tej tabeli.
+Pominięto na nim definicje niestandardowych struktur danych, które są identyczne co ich odpowiedniki w~modelu danych bazy Cassandra.
 
-\begin{minipage}{\linewidth}
-\begin{lstlisting}[language=CQL,caption={Definicja tabeli \textit{version} w modelu hybrydowym},label={lst:cassandraHybridVersionTable}]
-CREATE TABLE version (
-    file_id bigint,
-    save_date timestamp,
-    author frozen<user_summary>,
-    check_sum text,
-    differences list<frozen<difference>>,
-    file_content blob,
-    message text,
-    parsed_file_content text,
-    version_string text,
-    PRIMARY KEY (file_id, save_date)
-) WITH CLUSTERING ORDER BY (save_date DESC)
-\end{lstlisting}
-\end{minipage}
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.6\textwidth]{figures/hybrid_cassandra_model.png}
+\caption{Część nierelacyjna hybrydowego modelu danych}
+\label{fig:hybridCassandraPart}
+\end{figure}
 
-Konfiguracja indeksowania pełnotekstowego przez wtyczkę Elasticsearch pozostaje również identyczna co modelu bazującym tylko na samej Cassandrze i została ona opisana na stronie~\pageref{sec:cassandraTextIndexConfig} niniejszej pracy.
+Konfiguracja indeksowania pełnotekstowego przez wtyczkę Elasticsearch pozostaje również identyczna co modelu bazującym tylko na samej Cassandrze. 
+Została ona opisana na stronie~\pageref{sec:cassandraTextIndexConfig} niniejszej pracy.

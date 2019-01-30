@@ -136,11 +136,12 @@ Wszystkie te kroki mają na celu jak najszybszą odpowiedź dla klienta.
 Filtr Blooma jest kluczowym elementem decydującym czy baza ma w~ogóle przystępować do przeszukiwania indeksu w poszukiwaniu szukanego klucza.
 Każda SSTable posiada własny filtr.
 Jest to probabilistyczna struktura danych stworzona w~1970~roku przez Burtona Blooma.
-Jest używana do reprezentacji zbioru elementów pozwalającej na szybkie określenie przynależności elementu do zbioru z zadanym podczas jej tworzenia prawdopodobieństwem.
+Jest używana do reprezentacji zbioru elementów pozwalającej na szybkie określenie przynależności elementu do zbioru z~zadanym podczas jej tworzenia prawdopodobieństwem.
 
-Omawiana struktura danych jest $m$-bitową tablicą.
-Korzysta z $k$ niezależnych funkcji skrótu odwzorowujących elementy reprezentowanego zbioru na jedną z pozycji wynikowej tablicy.
-Po wypełnieniu w ten sposób tablicy sprawdzenie czy zadanego elementu nie ma w zbiorze polega na sprawdzeniu, czy którakolwiek z funkcji wskazuje na zero w tablicy.
+Omawiana struktura danych jest $m$-bitową tablicą i korzysta z $k$ niezależnych funkcji skrótu.
+Wstawienie elementu do filtru polega na obliczeniu wartości dla każdej funkcji skrótu, podając im na wejściach wstawiany element.
+Wartości te wskazują pozycje w tablicy, które należy ustawić na~$1$.
+Po wypełnieniu w~ten sposób tablicy sprawdzenie czy zadanego elementu nie ma w~zbiorze polega na sprawdzeniu, czy którakolwiek z~funkcji wskazuje na zero w~tablicy.
 
 Filtr posiada następujące właściwości:
 \begin{itemize}
@@ -151,7 +152,7 @@ Filtr posiada następujące właściwości:
 \end{itemize}
 
 Oprócz pewnego określenia, że zadany element nie należy do zbioru filtr może skłamać zwracając wartość pozytywną (sytuacja określana jako \textit{false positive}).
-Prawdopodobieństwo  błędnego  przypuszczenia  przynależności  elementu do zbioru $n$-elementowego jest wyrażane przez wzór \ref{eq:fpProp}.
+Prawdopodobieństwo  błędnego  przypuszczenia  przynależności  elementu do zbioru $n$-elementowego jest wyrażane przez wzór~\ref{eq:fpProp}.
 Szansa błędu rośnie wraz z liczbą wstawianych elementów $n$ i maleje wraz ze wzrostem rozmiaru tablicy bitowej $m$.
 
 \begin{equation} \label{eq:fpProp}
@@ -168,8 +169,7 @@ Dzięki niemu można wyznaczyć optymalną długość tablicy $m$ (wzór \ref{eq
     k = \frac{m}{n} \cdot \ln{\left(2\right)}
 \end{equation}
 
-W bazie danych Apache Cassandra jest możliwość konfiguracji współczynnika prawdopodobieństwa \textit{false positive} dla filtru Blooma.
-Dokonuje się tego per tabela ustawiając parametr \textit{bloom\_filter\_fp\_chance} \cite{cassandraBloomConf}. 
+W bazie danych Apache Cassandra jest możliwość konfiguracji współczynnika prawdopodobieństwa \textit{false positive} dla filtru Blooma danej tabeli ustawiając parametr konfiguracyjny \textit{bloom\_filter\_fp\_chance} \cite{cassandraBloomConf}.
 
 \subsection{Rozproszona architektura systemu}
 
